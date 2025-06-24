@@ -1,0 +1,170 @@
+Build the ChillBill Service Backend
+Objective:
+Create a backend service named "ChillBill Service" that handles bill-splitting functionality and integrates with a banking app called "banking." The service should provide RESTful APIs for the banking app to manage bill split requests, process images, calculate splits, handle payments, and track statuses. It must also integrate with an internal AI service for image processing and banking's payment system for payment processing.
+Overview:
+ChillBill Service acts as an intermediary between the banking app and internal services. It manages the entire bill-splitting process: creating requests, processing bill and group images via AI, calculating split amounts, managing participants, sending payment requests, and providing status updates and reports.
+Key Features and Requirements
+1. Core Functionality
+Bill Split Request Management:  
+Create, retrieve, update, and cancel bill split requests.  
+Store and manage bill details (e.g., total amount, merchant name, date).
+Image Processing:  
+Accept bill and group images from the banking app.  
+Forward images to an AI service for processing (bill data extraction and face recognition).  
+Handle AI callbacks and update the database with results.
+Participant Management:  
+Manage participant lists (add, remove, update).  
+Identify banking users vs. non-banking users.  
+Track payment status per participant.
+Split Calculation:  
+Support multiple split methods: equal, custom amount, percentage.  
+Calculate amounts owed by each participant.
+Payment Management:  
+Send payment requests to participants (in-app for banking users, links/QR codes for others).  
+Process payment updates via webhooks from banking’s payment system.  
+Allow manual marking of payments (e.g., offline payments).
+Notifications:  
+Send real-time notifications (e.g., payment requests, reminders, completion).  
+Support multiple channels: in-app (banking users), SMS, email (non-banking users).
+Status and Reporting:  
+Track bill split request statuses (e.g., created, active, completed).  
+Provide status history and basic reports (e.g., paid vs. unpaid amounts).
+2. Inputs and Outputs
+Inputs:  
+Bill image (for AI to extract total amount, merchant, date, etc.).  
+Group image (for AI to identify participants via face recognition).
+Outputs:  
+Split plan with amounts per participant.  
+Payment statuses for each participant.
+3. Integrations
+AI Service (Internal):  
+Send bill and group images for processing.  
+Receive callbacks with bill details and participant lists.  
+Note: For development, mock this service with dummy responses (e.g., hardcoded bill data and participant lists).
+banking Payment System:  
+Create payment requests and generate payment links/QR codes.  
+Receive webhook updates for payment statuses.  
+Note: Mock this system for testing (e.g., simulate payment creation and updates).
+API Endpoints
+Implement the following RESTful APIs under the base path /api/chillbill:
+Bill Management
+POST /bills - Create a new bill split request (returns request ID).  
+GET /bills - List user’s bill split requests.  
+GET /bills/{billId} - Get details of a specific request.  
+PUT /bills/{billId} - Update request details.  
+DELETE /bills/{billId} - Cancel a request.
+Image Processing
+POST /bills/{billId}/bill-image - Upload bill image.  
+POST /bills/{billId}/group-image - Upload group image.  
+GET /bills/{billId}/processing-status - Check image processing status.  
+Internal: POST /internal/bills/{billId}/bill-result - AI callback for bill data.  
+Internal: POST /internal/bills/{billId}/group-result - AI callback for participants.
+Participant Management
+GET /bills/{billId}/participants - List participants.  
+POST /bills/{billId}/participants - Add a participant.  
+PUT /bills/{billId}/participants/{participantId} - Update participant details.  
+DELETE /bills/{billId}/participants/{participantId} - Remove a participant.  
+GET /bills/{billId}/participants/unpaid - List unpaid participants.
+Bill Calculation
+POST /bills/{billId}/calculate - Calculate split based on chosen method.  
+POST /bills/{billId}/split/equal - Apply equal split.  
+POST /bills/{billId}/split/custom-amount - Apply custom amount split.  
+POST /bills/{billId}/split/percentage - Apply percentage split.
+Payment Management
+POST /bills/{billId}/request-payments - Send payment requests to all participants.  
+POST /bills/{billId}/participants/{participantId}/request-payment - Send request to one participant.  
+POST /webhook/payment-callback - Handle payment status updates from banking.  
+PUT /bills/{billId}/participants/{participantId}/mark-as-paid - Manually mark as paid.
+Notification Management
+POST /bills/{billId}/send-notifications - Notify all participants.  
+POST /bills/{billId}/send-reminders - Send payment reminders.
+Status Management
+GET /bills/{billId}/status - Get current status.  
+GET /bills/{billId}/status-history - Get status history.
+Database Schema
+Implement the following tables in a database (e.g., PostgreSQL or MongoDB):
+erDiagram
+    Bills {
+        UUID id PK
+        UUID creator_id FK
+        DECIMAL total_amount
+        VARCHAR merchant_name
+        DATETIME bill_date
+        ENUM status
+        ENUM split_method
+        BOOLEAN ai_processed
+        VARCHAR bill_image_path
+        VARCHAR group_image_path
+        VARCHAR ai_bill_id
+        VARCHAR ai_group_id
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    Participants {
+        UUID id PK
+        UUID bill_id FK
+        UUID user_id FK
+        VARCHAR name
+        VARCHAR phone
+        VARCHAR email
+        BOOLEAN is_cake_user
+        DECIMAL amount_to_pay
+        DECIMAL percentage
+        ENUM payment_status
+        VARCHAR ai_face_id
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    PaymentRequests {
+        UUID id PK
+        UUID bill_id FK
+        UUID participant_id FK
+        VARCHAR payment_link
+        VARCHAR qr_code_url
+        DATETIME expiry_date
+        ENUM status
+        VARCHAR payment_id
+        INTEGER retry_count
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    Notifications {
+        UUID id PK
+        UUID bill_id FK
+        UUID participant_id FK
+        ENUM type
+        ENUM channel
+        ENUM status
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    StatusHistory {
+        UUID id PK
+        UUID bill_id FK
+        UUID participant_id FK
+        VARCHAR previous_status
+        VARCHAR new_status
+        VARCHAR changed_by
+        TEXT reason
+        TIMESTAMP created_at
+    }
+
+    Bills ||--o{ Participants : "has"
+    Bills ||--o{ PaymentRequests : "has"
+    Participants ||--o{ PaymentRequests : "has"
+    Bills ||--o{ Notifications : "has"
+    Participants ||--o{ Notifications : "has"
+    Bills ||--o{ StatusHistory : "has"
+    Participants ||--o{ StatusHistory : "has"
+Technical Specifications
+Additional Requirements
+File Uploads: Handle image uploads via multipart/form-data.  
+Error Handling: Return meaningful error messages (e.g., 400 for bad requests, 404 for not found).  
+Testing: Write unit tests for key modules (bill creation, split calculation, payment updates).
+Mock Integrations
+AI Service: Simulate with dummy responses (e.g., { total_amount: 100, merchant_name: "Test Restaurant", participants: ["Alice", "Bob"] }).  
+Payment System: Mock payment requests and webhook updates (e.g., simulate "paid" status after a delay).
