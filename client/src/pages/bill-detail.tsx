@@ -13,26 +13,21 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export default function BillDetail() {
-  const { billId } = useParams();
+  const params = useParams();
+  const billId = params.id; // Router uses :id parameter
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const { data: bill, isLoading: billLoading } = useQuery({
     queryKey: ['/api/chillbill/bills', billId],
-    queryFn: async () => {
-      const response = await fetch(`/api/chillbill/bills/${billId}`);
-      if (!response.ok) throw new Error('Failed to fetch bill');
-      return response.json();
-    }
+    queryFn: () => apiRequest('GET', `/api/chillbill/bills/${billId}`),
+    enabled: !!billId,
   });
 
   const { data: participants = [], isLoading: participantsLoading } = useQuery({
     queryKey: ['/api/chillbill/bills', billId, 'participants'],
-    queryFn: async () => {
-      const response = await fetch(`/api/chillbill/bills/${billId}/participants`);
-      if (!response.ok) throw new Error('Failed to fetch participants');
-      return response.json();
-    }
+    queryFn: () => apiRequest('GET', `/api/chillbill/bills/${billId}/participants`),
+    enabled: !!billId,
   });
 
   const sendRemindersMutation = useMutation({
@@ -83,6 +78,18 @@ export default function BillDetail() {
     }
   };
 
+  if (!billId) {
+    return (
+      <div className="max-w-md mx-auto bg-white min-h-screen p-4">
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Invalid Bill</h2>
+          <p className="text-gray-600 mb-4">No bill ID provided.</p>
+          <Button onClick={() => setLocation('/')}>Go Home</Button>
+        </div>
+      </div>
+    );
+  }
+
   if (billLoading || participantsLoading) {
     return (
       <div className="max-w-md mx-auto bg-white min-h-screen">
@@ -96,6 +103,18 @@ export default function BillDetail() {
               <Skeleton className="h-32 w-full" />
             </CardContent>
           </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (!bill) {
+    return (
+      <div className="max-w-md mx-auto bg-white min-h-screen p-4">
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Bill Not Found</h2>
+          <p className="text-gray-600 mb-4">The bill you're looking for doesn't exist.</p>
+          <Button onClick={() => setLocation('/')}>Go Home</Button>
         </div>
       </div>
     );

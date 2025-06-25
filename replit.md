@@ -102,6 +102,8 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 25, 2025: Fixed bill detail page parameter extraction - changed from billId to id to match router configuration
+- June 25, 2025: Updated API calls in bill detail to use apiRequest helper and proper error handling
 - June 25, 2025: Enhanced QR code generation with shareable participant selection links and improved UI
 - June 25, 2025: Added comprehensive homepage with bill management dashboard and statistics
 - June 25, 2025: Fixed participant update API endpoints - corrected PATCH to PUT method and endpoint structure
@@ -110,7 +112,6 @@ Key enums define status types:
 - June 25, 2025: Implemented participant count input with automatic even split calculation  
 - June 25, 2025: Added bill owner highlighting with crown badge in participant review
 - June 25, 2025: Fixed routing issues between bill creation and participant screens
-- June 25, 2025: Simplified navigation flow removing AI processing complexity
 
 ## User Preferences
 
