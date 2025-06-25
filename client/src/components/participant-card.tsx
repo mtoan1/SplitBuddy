@@ -11,12 +11,23 @@ interface ParticipantCardProps {
     phone?: string;
     amountToPay: string;
     paymentStatus: 'pending' | 'paid' | 'failed' | 'overdue';
+    paidAt?: string;
+    paymentMethod?: string;
+    transactionId?: string;
   };
   onClick?: () => void;
   selectable?: boolean;
+  showPayButton?: boolean;
+  onPayClick?: (participantId: string) => void;
 }
 
-export default function ParticipantCard({ participant, onClick, selectable = false }: ParticipantCardProps) {
+export default function ParticipantCard({ 
+  participant, 
+  onClick, 
+  selectable = false, 
+  showPayButton = false,
+  onPayClick 
+}: ParticipantCardProps) {
   const { name, phone, amountToPay, paymentStatus } = participant;
   const initials = getInitials(name);
   const amount = parseFloat(amountToPay || '0');

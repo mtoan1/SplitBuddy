@@ -10,7 +10,7 @@ import CreateBill from "@/pages/create-bill";
 import BillDetail from "@/pages/bill-detail";
 import ManualParticipants from "@/pages/manual-participants";
 import ParticipantSelection from "@/pages/participant-selection";
-import PaymentScreen from "@/pages/payment-screen";
+import PaymentFlow from "@/pages/payment-flow";
 import PaymentSuccess from "@/pages/payment-success";
 
 function Router() {
