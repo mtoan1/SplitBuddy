@@ -13,6 +13,7 @@ import { insertBillSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import AIProcessingModal from "@/components/ai-processing-modal";
 
 const createBillFormSchema = insertBillSchema.extend({
   totalAmount: z.string().min(1, "Total amount is required"),
@@ -27,6 +28,8 @@ export default function CreateBill() {
   const { toast } = useToast();
   const [billImage, setBillImage] = useState<File | null>(null);
   const [groupImage, setGroupImage] = useState<File | null>(null);
+  const [showAIProcessing, setShowAIProcessing] = useState(false);
+  const [createdBillId, setCreatedBillId] = useState<string | null>(null);
 
   const form = useForm<CreateBillForm>({
     resolver: zodResolver(createBillFormSchema),
@@ -49,23 +52,18 @@ export default function CreateBill() {
       return apiRequest('POST', '/api/chillbill/bills', billData);
     },
     onSuccess: async (newBill) => {
-      // Process bill image if uploaded
-      if (billImage) {
-        await processBillImage(newBill.id);
-      }
+      setCreatedBillId(newBill.id);
       
-      // Process group image if uploaded
-      if (groupImage) {
-        await processGroupImage(newBill.id);
+      // If images were uploaded, start AI processing
+      if (billImage || groupImage) {
+        setShowAIProcessing(true);
+      } else {
+        toast({
+          title: "Bill Created",
+          description: "Your bill has been created successfully!",
+        });
+        setLocation(`/bill/${newBill.id}`);
       }
-
-      toast({
-        title: "Bill Created",
-        description: "Your bill has been created successfully!",
-      });
-
-      // Navigate to the bill dashboard
-      setLocation(`/bill/${newBill.id}`);
     },
     onError: () => {
       toast({
@@ -94,6 +92,18 @@ export default function CreateBill() {
 
   const onSubmit = (data: CreateBillForm) => {
     createBillMutation.mutate(data);
+  };
+
+  const handleAIProcessingComplete = (processedData: any) => {
+    setShowAIProcessing(false);
+    toast({
+      title: "AI Processing Complete",
+      description: `Bill processed: ${processedData.participants?.length || 0} participants identified`,
+    });
+    
+    if (createdBillId) {
+      setLocation(`/bill/${createdBillId}`);
+    }
   };
 
   return (
@@ -240,6 +250,15 @@ export default function CreateBill() {
             {createBillMutation.isPending ? 'Creating Bill...' : 'Create Bill & Generate QR Code'}
           </Button>
         </form>
+
+        {/* AI Processing Modal */}
+        {showAIProcessing && createdBillId && (
+          <AIProcessingModal
+            isOpen={showAIProcessing}
+            billId={createdBillId}
+            onComplete={handleAIProcessingComplete}
+          />
+        )}
       </div>
     </div>
   );
