@@ -25,9 +25,11 @@ export default function Homepage() {
       <header className="mobile-header">
         <div className="px-6 py-6 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-primary to-primary/90 rounded-3xl flex items-center justify-center neon-glow">
-              <Receipt className="text-white text-xl" />
-            </div>
+            <img 
+              src="https://cake.vn/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FCake-logo-01.e915daf7.webp&w=256&q=75"
+              alt="Cake Logo"
+              className="w-14 h-14 rounded-2xl"
+            />
             <div>
               <h1 className="text-2xl font-bold neon-text">ChillBill</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">Split bills effortlessly</p>

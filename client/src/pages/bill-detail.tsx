@@ -139,6 +139,11 @@ export default function BillDetail() {
             >
               <Home className="h-5 w-5 text-primary" />
             </Button>
+            <img 
+              src="https://cake.vn/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FCake-logo-01.e915daf7.webp&w=256&q=75"
+              alt="Cake Logo"
+              className="w-10 h-10 rounded-xl"
+            />
             <div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">Bill Details</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">{bill?.merchantName}</p>
