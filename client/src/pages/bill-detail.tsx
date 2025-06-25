@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Bell, Receipt, Users, Share2, Copy, QrCode } from "lucide-react";
+import { Plus, Bell, Receipt, Users, Share2, Copy, QrCode, Home, ArrowLeft } from "lucide-react";
 import QRCodeDisplay from "@/components/qr-code-display";
 import ParticipantCard from "@/components/participant-card";
 import { formatCurrency, formatDate, calculatePaidPercentage, calculateTotalPaid } from "@/lib/utils";
@@ -129,23 +129,32 @@ export default function BillDetail() {
     <div className="mobile-container">
       {/* Header */}
       <header className="mobile-header">
-        <div className="px-6 py-6 flex items-center justify-between">
+        <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/90 rounded-3xl flex items-center justify-center neon-glow">
-              <Receipt className="text-white text-lg" />
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setLocation('/')}
+              className="rounded-full w-10 h-10 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors"
+            >
+              <Home className="h-5 w-5 text-primary" />
+            </Button>
             <div>
-              <h1 className="text-xl font-bold neon-text">{bill?.merchantName}</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{formatDate(bill?.billDate)}</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">Bill Details</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{bill?.merchantName}</p>
             </div>
           </div>
-          <Badge variant={bill?.status === 'completed' ? 'default' : 'secondary'} className="capitalize">
-            {bill?.status}
-          </Badge>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full w-10 h-10 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors"
+          >
+            <Bell className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          </Button>
         </div>
       </header>
 
-      <div className="p-4 space-y-6">
+      <div className="mobile-content">
         {/* Bill Summary Card */}
         <Card>
           <CardContent className="p-4">

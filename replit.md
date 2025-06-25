@@ -102,6 +102,8 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 25, 2025: Added home navigation shortcuts to bill screens with consistent neon pink/deep blue styling
+- June 25, 2025: Updated secondary color to deep blue (#271d7a) to match requested color scheme
 - June 25, 2025: Changed primary color from green to neon pink (#ff37a5) as requested by user
 - June 25, 2025: Fixed app compilation errors - removed broken JSX fragments and Card import issues
 - June 25, 2025: Standardized mobile layout sizing from max-w-sm to max-w-md across all screens for consistency

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Bell, Receipt, User, Users } from "lucide-react";
+import { Plus, Bell, Receipt, User, Users, Home, ArrowLeft } from "lucide-react";
 import QRCodeDisplay from "@/components/qr-code-display";
 import ParticipantCard from "@/components/participant-card";
 import { formatCurrency, formatDate, calculatePaidPercentage, calculateTotalPaid } from "@/lib/utils";
@@ -126,16 +126,28 @@ export default function BillDashboard() {
   return (
     <div className="max-w-md mx-auto bg-white min-h-screen">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-100">
-        <div className="px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Receipt className="text-white text-sm" />
+      <header className="mobile-header">
+        <div className="px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setLocation('/')}
+              className="rounded-full w-10 h-10 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors"
+            >
+              <Home className="h-5 w-5 text-primary" />
+            </Button>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">Bill Dashboard</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Demo Bill</p>
             </div>
-            <h1 className="text-xl font-semibold text-text-primary">ChillBill</h1>
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <User className="h-4 w-4" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full w-10 h-10 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors"
+          >
+            <Bell className="h-5 w-5 text-gray-600 dark:text-gray-400" />
           </Button>
         </div>
       </header>
