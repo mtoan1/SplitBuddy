@@ -64,13 +64,13 @@ export default function Homepage() {
           
           <Button
             onClick={() => setLocation('/bills')}
-            className="mobile-button-secondary h-28"
+            className="mobile-button-primary h-28 neon-glow"
           >
             <div className="flex flex-col items-center space-y-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <Receipt className="h-6 w-6 text-primary" />
+              <div className="w-10 h-10 bg-white/25 rounded-full flex items-center justify-center">
+                <Receipt className="h-6 w-6" />
               </div>
-              <span className="text-sm font-bold text-gray-700 dark:text-gray-300">My Bills</span>
+              <span className="text-sm font-bold">My Bills</span>
             </div>
           </Button>
         </div>
