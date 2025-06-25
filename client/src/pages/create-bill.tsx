@@ -195,11 +195,21 @@ export default function CreateBill() {
     <div className="mobile-container">
       {/* Header */}
       <header className="mobile-header">
-        <div className="px-6 py-6 flex items-center">
-          <Button variant="ghost" size="icon" onClick={() => setLocation('/')} className="rounded-full hover:bg-primary/10">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-xl font-bold ml-4 neon-text">Create New Bill</h1>
+        <div className="px-6 py-6 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="icon" onClick={() => setLocation('/')} className="rounded-full w-10 h-10 hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+              <ArrowLeft className="h-5 w-5 text-primary" />
+            </Button>
+            <img 
+              src="https://cake.vn/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FCake-logo-01.e915daf7.webp&w=256&q=75"
+              alt="Cake Logo"
+              className="w-10 h-10 rounded-xl object-contain"
+            />
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">Create New Bill</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Start splitting expenses</p>
+            </div>
+          </div>
         </div>
       </header>
 

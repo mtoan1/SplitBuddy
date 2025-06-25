@@ -28,7 +28,7 @@ export default function Homepage() {
             <img 
               src="https://cake.vn/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FCake-logo-01.e915daf7.webp&w=256&q=75"
               alt="Cake Logo"
-              className="w-14 h-14 rounded-2xl"
+              className="w-14 h-14 rounded-2xl object-contain"
             />
             <div>
               <h1 className="text-2xl font-bold neon-text">ChillBill</h1>
