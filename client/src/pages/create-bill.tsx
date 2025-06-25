@@ -73,9 +73,11 @@ export default function CreateBill() {
       
       // If images were uploaded, start AI processing, otherwise go to participants page
       if (billImage || groupImage) {
+        console.log('Starting AI processing for bill:', newBill.id);
         setShowAIProcessing(true);
       } else {
         // Navigate to participants review page
+        console.log('Navigating to participants page for bill:', newBill.id);
         setLocation(`/bill/${newBill.id}/participants`);
       }
     },
@@ -154,7 +156,10 @@ export default function CreateBill() {
     });
     
     if (createdBillId) {
+      console.log('Navigating to participants page for bill:', createdBillId);
       setLocation(`/bill/${createdBillId}/participants`);
+    } else {
+      console.error('No createdBillId available for navigation');
     }
   };
 
