@@ -85,24 +85,9 @@ export default function CreateBill() {
         description: `${form.getValues('participantCount')} participants created with even split`,
       });
       
-      // If images were uploaded, start AI processing, otherwise go to participants page
-      if (billImage || groupImage) {
-        console.log('Starting AI processing for bill:', billId);
-        // Set a timeout to simulate AI processing and then navigate
-        setTimeout(() => {
-          setShowAIProcessing(false);
-          toast({
-            title: "AI Processing Complete",
-            description: "Mock participants generated successfully",
-          });
-          setLocation(`/bill/${billId}/participants`);
-        }, 3000);
-        setShowAIProcessing(true);
-      } else {
-        // Navigate to participants review page immediately
-        console.log('Navigating to participants page for bill:', billId);
-        setLocation(`/bill/${billId}/participants`);
-      }
+      // Navigate to participants page regardless of image upload
+      console.log('Navigating to participants page for bill:', billId);
+      setLocation(`/bill/${billId}/participants`);
     },
     onError: (error) => {
       console.error('Bill creation error:', error);

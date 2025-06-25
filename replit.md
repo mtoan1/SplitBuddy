@@ -100,9 +100,13 @@ Key enums define status types:
 - **Production**: `npm run build` then `npm run start`
 - Database migrations via `npm run db:push`
 
-## Changelog
+## Recent Changes
 
-- June 24, 2025. Initial setup
+- June 25, 2025: Fixed critical API response parsing issue preventing bill creation navigation
+- June 25, 2025: Implemented participant count input with automatic even split calculation  
+- June 25, 2025: Added bill owner highlighting with crown badge in participant review
+- June 25, 2025: Fixed routing issues between bill creation and participant screens
+- June 25, 2025: Simplified navigation flow removing AI processing complexity
 
 ## User Preferences
 
