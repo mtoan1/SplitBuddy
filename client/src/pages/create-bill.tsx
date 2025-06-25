@@ -53,6 +53,7 @@ export default function CreateBill() {
       };
       console.log('Sending bill data:', billData);
       const result = await apiRequest('POST', '/api/chillbill/bills', billData);
+      console.log('API response result:', result);
       
       // Create participants with even split calculation
       if (result.id && data.participantCount) {
@@ -62,9 +63,21 @@ export default function CreateBill() {
       return result;
     },
     onSuccess: async (newBill) => {
-      console.log('Bill created successfully:', newBill);
-      setCreatedBillId(newBill.id);
+      console.log('Bill created successfully - full response:', newBill);
+      const billId = newBill?.id;
+      console.log('Extracted bill ID:', billId);
       
+      if (!billId) {
+        console.error('No bill ID found in response:', newBill);
+        toast({
+          title: "Error",
+          description: "Failed to get bill ID from server response",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setCreatedBillId(billId);
       queryClient.invalidateQueries({ queryKey: ['/api/chillbill/bills'] });
       
       toast({
@@ -74,21 +87,21 @@ export default function CreateBill() {
       
       // If images were uploaded, start AI processing, otherwise go to participants page
       if (billImage || groupImage) {
-        console.log('Starting AI processing for bill:', newBill.id);
+        console.log('Starting AI processing for bill:', billId);
         // Set a timeout to simulate AI processing and then navigate
         setTimeout(() => {
-          handleAIProcessingComplete({
-            participants: Array.from({ length: form.getValues('participantCount') }, (_, i) => ({
-              name: ['Alex Chen', 'Sarah Johnson', 'Mike Rodriguez', 'Emily Davis', 'Jordan Kim'][i] || `Person ${i + 1}`,
-              phone: `+1 (555) ${String(Math.floor(Math.random() * 900) + 100)}-${String(Math.floor(Math.random() * 9000) + 1000)}`
-            }))
+          setShowAIProcessing(false);
+          toast({
+            title: "AI Processing Complete",
+            description: "Mock participants generated successfully",
           });
+          setLocation(`/bill/${billId}/participants`);
         }, 3000);
         setShowAIProcessing(true);
       } else {
-        // Navigate to participants review page
-        console.log('Navigating to participants page for bill:', newBill.id);
-        setLocation(`/bill/${newBill.id}/participants`);
+        // Navigate to participants review page immediately
+        console.log('Navigating to participants page for bill:', billId);
+        setLocation(`/bill/${billId}/participants`);
       }
     },
     onError: (error) => {
