@@ -102,6 +102,7 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 25, 2025: Enhanced QR code generation with shareable participant selection links and improved UI
 - June 25, 2025: Added comprehensive homepage with bill management dashboard and statistics
 - June 25, 2025: Fixed participant update API endpoints - corrected PATCH to PUT method and endpoint structure
 - June 25, 2025: Resolved data type validation for amountToPay field (string vs number)

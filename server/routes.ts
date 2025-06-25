@@ -221,24 +221,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // QR Code generation
   app.get("/api/chillbill/bills/:billId/qr-code", async (req, res) => {
     try {
-      const bill = await storage.getBillById(req.params.billId);
+      const billId = req.params.billId;
+      const bill = await storage.getBillById(billId);
       if (!bill) {
         return res.status(404).json({ message: "Bill not found" });
       }
 
-      const baseUrl = process.env.REPLIT_DOMAINS?.split(',')[0] || `http://localhost:5000`;
-      const qrUrl = `${baseUrl}/bill/${req.params.billId}`;
+      // Generate share URL for participants to join the bill
+      const baseUrl = process.env.REPLIT_DEV_DOMAIN ? 
+        `https://${process.env.REPLIT_DEV_DOMAIN}` : 
+        process.env.REPLIT_DOMAINS?.split(',')[0] || 
+        `http://localhost:5000`;
       
-      const qrCodeDataUrl = await QRCode.toDataURL(qrUrl, {
-        width: 256,
-        margin: 2,
+      const shareUrl = `${baseUrl}/participant-selection/${billId}`;
+
+      // Generate QR code with enhanced styling
+      const qrCodeDataUrl = await QRCode.toDataURL(shareUrl, {
+        width: 300,
+        margin: 3,
         color: {
-          dark: '#2C3E50',
+          dark: '#1F2937', // Dark gray for better scanning
           light: '#FFFFFF'
-        }
+        },
+        errorCorrectionLevel: 'M'
       });
 
-      res.json({ qrCodeDataUrl, url: qrUrl });
+      res.json({ 
+        qrCodeUrl: qrCodeDataUrl, 
+        shareUrl: shareUrl,
+        billId: billId,
+        billName: bill.merchantName,
+        totalAmount: bill.totalAmount
+      });
     } catch (error) {
       res.status(500).json({ message: "Failed to generate QR code", error });
     }
