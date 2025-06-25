@@ -102,6 +102,7 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 25, 2025: Updated bill dashboard to show real bills from API instead of hardcoded demo data
 - June 25, 2025: Updated participant generation to use Vietnamese names (Toan, Hung, Tue, An, etc.)
 - June 25, 2025: Modified participant headers to display names instead of numbers with compact layout
 - June 25, 2025: Fixed logo image distortion by adding object-contain CSS class to maintain aspect ratio
