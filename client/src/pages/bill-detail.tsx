@@ -218,11 +218,11 @@ export default function BillDetail() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-text-primary">Participants ({participants.length})</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Participants ({participants.length})</h3>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="text-primary"
+                className="text-primary hover:bg-primary/10"
                 onClick={() => setLocation(`/bill/${billId}/add-participants`)}
               >
                 <Plus className="w-4 h-4 mr-1" />
@@ -234,8 +234,8 @@ export default function BillDetail() {
               {participants.length === 0 ? (
                 <div className="text-center py-8">
                   <Users className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                  <h4 className="font-medium text-text-primary mb-2">No participants yet</h4>
-                  <p className="text-sm text-gray-600 mb-4">Add people to split this bill</p>
+                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">No participants yet</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Add people to split this bill</p>
                   <Button 
                     className="bg-primary text-white hover:bg-primary/90"
                     onClick={() => setLocation(`/bill/${billId}/add-participants`)}
