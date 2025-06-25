@@ -5,10 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Bell, Receipt, User, Users, Home, ArrowLeft } from "lucide-react";
-import QRCodeDisplay from "@/components/qr-code-display";
-import ParticipantCard from "@/components/participant-card";
-import { formatCurrency, formatDate, calculatePaidPercentage, calculateTotalPaid } from "@/lib/utils";
+import { Plus, Bell, Receipt, Home } from "lucide-react";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -64,10 +62,6 @@ export default function BillDashboard() {
       </div>
     );
   }
-
-  const totalAmount = parseFloat(bill?.totalAmount || '0');
-  const paidPercentage = calculatePaidPercentage(participants);
-  const totalPaid = calculateTotalPaid(participants);
 
   return (
     <div className="mobile-container">
