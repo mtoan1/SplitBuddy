@@ -102,6 +102,8 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 25, 2025: Updated participant generation to use Vietnamese names (Toan, Hung, Tue, An, etc.)
+- June 25, 2025: Modified participant headers to display names instead of numbers with compact layout
 - June 25, 2025: Fixed logo image distortion by adding object-contain CSS class to maintain aspect ratio
 - June 25, 2025: Replaced app logo with Cake company logo across all page headers
 - June 25, 2025: Updated to modern flat design style - removed drop shadows, using clean borders and subtle hover effects

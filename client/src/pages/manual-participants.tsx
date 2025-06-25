@@ -126,8 +126,8 @@ export default function ManualParticipants() {
   const remaining = billTotal - totalAssigned;
 
   return (
-    <div className="max-w-md mx-auto bg-white min-h-screen">
-      <div className="p-4 space-y-6">
+    <div className="mobile-container">
+      <div className="mobile-content">
         {/* Header */}
         <div className="flex items-center mb-6">
           <Button variant="ghost" size="icon" onClick={() => setLocation('/')}>
@@ -194,18 +194,18 @@ export default function ManualParticipants() {
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3">
                   {fields.map((field, index) => {
                     const isOwner = index === 0;
                     return (
                       <div 
                         key={field.id} 
-                        className={`border rounded-lg p-4 space-y-3 ${isOwner ? 'bg-primary/5 border-primary/20' : 'bg-white'}`}
+                        className={`mobile-card space-y-3 ${isOwner ? 'bg-primary/5 border-primary/20' : ''}`}
                       >
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2">
                             <h3 className="font-medium">
-                              {isOwner ? 'Bill Owner' : `Person ${index + 1}`}
+                              {form.watch(`participants.${index}.name`) || (isOwner ? 'Bill Owner' : `Person ${index + 1}`)}
                             </h3>
                             {isOwner && (
                               <Badge variant="default" className="bg-primary/10 text-primary border-primary/20">
@@ -226,46 +226,50 @@ export default function ManualParticipants() {
                           )}
                         </div>
                         
-                        <div>
-                          <Label htmlFor={`participants.${index}.name`}>Name</Label>
-                          <Input
-                            {...form.register(`participants.${index}.name`)}
-                            placeholder="Enter name"
-                          />
-                          {form.formState.errors.participants?.[index]?.name && (
-                            <p className="text-sm text-red-500 mt-1">
-                              {form.formState.errors.participants[index]?.name?.message}
-                            </p>
-                          )}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label htmlFor={`participants.${index}.name`} className="text-xs font-bold text-gray-700 dark:text-gray-300">Name</Label>
+                            <Input
+                              {...form.register(`participants.${index}.name`)}
+                              placeholder="Enter name"
+                              className="mobile-input"
+                            />
+                            {form.formState.errors.participants?.[index]?.name && (
+                              <p className="text-xs text-red-500 mt-1">
+                                {form.formState.errors.participants[index]?.name?.message}
+                              </p>
+                            )}
+                          </div>
+
+                          <div>
+                            <Label htmlFor={`participants.${index}.amountToPay`} className="text-xs font-bold text-gray-700 dark:text-gray-300">
+                              Amount {isOwner && '(+remainder)'}
+                            </Label>
+                            <Input
+                              {...form.register(`participants.${index}.amountToPay`)}
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              className={`mobile-input ${isOwner ? 'font-bold text-primary' : ''}`}
+                            />
+                            {form.formState.errors.participants?.[index]?.amountToPay && (
+                              <p className="text-xs text-red-500 mt-1">
+                                {form.formState.errors.participants[index]?.amountToPay?.message}
+                              </p>
+                            )}
+                          </div>
                         </div>
 
                         <div>
-                          <Label htmlFor={`participants.${index}.phone`}>Phone</Label>
+                          <Label htmlFor={`participants.${index}.phone`} className="text-xs font-bold text-gray-700 dark:text-gray-300">Phone</Label>
                           <Input
                             {...form.register(`participants.${index}.phone`)}
-                            placeholder="e.g., +1 (555) 123-4567"
+                            placeholder="e.g., +84 123 456 789"
+                            className="mobile-input"
                           />
                           {form.formState.errors.participants?.[index]?.phone && (
-                            <p className="text-sm text-red-500 mt-1">
+                            <p className="text-xs text-red-500 mt-1">
                               {form.formState.errors.participants[index]?.phone?.message}
-                            </p>
-                          )}
-                        </div>
-
-                        <div>
-                          <Label htmlFor={`participants.${index}.amountToPay`}>
-                            Amount to Pay {isOwner && '(includes remainder)'}
-                          </Label>
-                          <Input
-                            {...form.register(`participants.${index}.amountToPay`)}
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            className={isOwner ? 'font-medium' : ''}
-                          />
-                          {form.formState.errors.participants?.[index]?.amountToPay && (
-                            <p className="text-sm text-red-500 mt-1">
-                              {form.formState.errors.participants[index]?.amountToPay?.message}
                             </p>
                           )}
                         </div>

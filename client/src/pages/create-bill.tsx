@@ -133,9 +133,8 @@ export default function CreateBill() {
 
   const createParticipantsForBill = async (billId: string, participantCount: number, totalAmount: number) => {
     const mockNames = [
-      "Alex Chen", "Sarah Johnson", "Mike Rodriguez", "Emily Davis", "Jordan Kim",
-      "Taylor Brown", "Casey Wilson", "Morgan Lee", "Riley Martinez", "Jamie Thompson",
-      "Avery Garcia", "Quinn Anderson", "Dakota Miller", "Sage Jackson", "River White"
+      "Toan", "Hung", "Tue", "An", "Hien", "Tony", "Phuong", "Thuy", "Lap", "Tri",
+      "Thai", "Hue", "Hau", "Trung", "Tuan", "Son", "Anh", "Bill"
     ];
     
     const mockPhones = [
