@@ -7,37 +7,35 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Users, ArrowLeft } from "lucide-react";
 import ParticipantCard from "@/components/participant-card";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ParticipantSelection() {
-  const { billId } = useParams();
+  const params = useParams();
+  const billId = params.id; // Router uses :id parameter
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   const { data: bill, isLoading: billLoading } = useQuery({
     queryKey: ['/api/chillbill/bills', billId],
-    queryFn: async () => {
-      const response = await fetch(`/api/chillbill/bills/${billId}`);
-      if (!response.ok) throw new Error('Failed to fetch bill');
-      return response.json();
-    }
+    queryFn: () => apiRequest('GET', `/api/chillbill/bills/${billId}`),
+    enabled: !!billId,
   });
 
   const { data: unpaidParticipants = [], isLoading: participantsLoading } = useQuery({
     queryKey: ['/api/chillbill/bills', billId, 'participants', 'unpaid'],
-    queryFn: async () => {
-      const response = await fetch(`/api/chillbill/bills/${billId}/participants/unpaid`);
-      if (!response.ok) throw new Error('Failed to fetch unpaid participants');
-      return response.json();
-    }
+    queryFn: () => apiRequest('GET', `/api/chillbill/bills/${billId}/participants/unpaid`),
+    enabled: !!billId,
   });
 
   const handleSelectParticipant = (participantId: string) => {
-    setLocation(`/bill/${billId}/pay/${participantId}`);
+    setLocation(`/payment/${billId}/${participantId}`);
   };
 
   const handlePhoneSearch = () => {
     // For demo purposes, redirect to first unpaid participant
     if (unpaidParticipants.length > 0) {
-      setLocation(`/bill/${billId}/pay/${unpaidParticipants[0].id}`);
+      setLocation(`/payment/${billId}/${unpaidParticipants[0].id}`);
     }
   };
 
