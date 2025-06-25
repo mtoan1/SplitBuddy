@@ -77,7 +77,7 @@ export default function ManualParticipants() {
         description: `${participants.length} participants added successfully!`,
       });
       
-      setLocation(`/bill/${billId}`);
+      setLocation(`/bill/${billId}/detail`);
     },
     onError: () => {
       toast({

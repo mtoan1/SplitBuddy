@@ -70,7 +70,8 @@ export default function CreateBill() {
         }, 1000);
       }
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Bill creation error:', error);
       toast({
         title: "Error",
         description: "Failed to create bill. Please try again.",
@@ -96,6 +97,8 @@ export default function CreateBill() {
   };
 
   const onSubmit = (data: CreateBillForm) => {
+    console.log('Form submitted with data:', data);
+    console.log('Form errors:', form.formState.errors);
     createBillMutation.mutate(data);
   };
 
@@ -107,7 +110,7 @@ export default function CreateBill() {
     });
     
     if (createdBillId) {
-      setLocation(`/bill/${createdBillId}`);
+      setLocation(`/bill/${createdBillId}/detail`);
     }
   };
 
