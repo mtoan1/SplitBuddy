@@ -34,7 +34,7 @@ export default function CreateBill() {
   const form = useForm<CreateBillForm>({
     resolver: zodResolver(createBillFormSchema),
     defaultValues: {
-      creatorId: 'demo-user',
+      creatorId: '550e8400-e29b-41d4-a716-446655440000', // Valid UUID for demo
       totalAmount: '',
       merchantName: '',
       billDate: new Date().toISOString().split('T')[0],
@@ -47,8 +47,9 @@ export default function CreateBill() {
     mutationFn: async (data: CreateBillForm) => {
       const billData = {
         ...data,
-        billDate: new Date(data.billDate).toISOString()
+        billDate: data.billDate // Send as string, backend will transform it
       };
+      console.log('Sending bill data:', billData);
       return apiRequest('POST', '/api/chillbill/bills', billData);
     },
     onSuccess: async (newBill) => {

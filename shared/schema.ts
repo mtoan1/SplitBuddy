@@ -135,6 +135,8 @@ export const insertBillSchema = createInsertSchema(bills).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  billDate: z.string().transform((str) => new Date(str))
 });
 
 export const insertParticipantSchema = createInsertSchema(participants).omit({
