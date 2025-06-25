@@ -103,7 +103,7 @@ export default function ManualParticipants() {
         title: "Participants Updated",
         description: "All participants have been saved successfully.",
       });
-      setLocation(`/bill/${billId}/detail`);
+      setLocation(`/bill/${billId}`);
     },
     onError: (error) => {
       console.error('Failed to update participants:', error);
