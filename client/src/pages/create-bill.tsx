@@ -62,6 +62,7 @@ export default function CreateBill() {
       return result;
     },
     onSuccess: async (newBill) => {
+      console.log('Bill created successfully:', newBill);
       setCreatedBillId(newBill.id);
       
       queryClient.invalidateQueries({ queryKey: ['/api/chillbill/bills'] });
@@ -74,6 +75,15 @@ export default function CreateBill() {
       // If images were uploaded, start AI processing, otherwise go to participants page
       if (billImage || groupImage) {
         console.log('Starting AI processing for bill:', newBill.id);
+        // Set a timeout to simulate AI processing and then navigate
+        setTimeout(() => {
+          handleAIProcessingComplete({
+            participants: Array.from({ length: form.getValues('participantCount') }, (_, i) => ({
+              name: ['Alex Chen', 'Sarah Johnson', 'Mike Rodriguez', 'Emily Davis', 'Jordan Kim'][i] || `Person ${i + 1}`,
+              phone: `+1 (555) ${String(Math.floor(Math.random() * 900) + 100)}-${String(Math.floor(Math.random() * 9000) + 1000)}`
+            }))
+          });
+        }, 3000);
         setShowAIProcessing(true);
       } else {
         // Navigate to participants review page

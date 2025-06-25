@@ -184,6 +184,17 @@ export default function AIProcessingModal({ isOpen, billId, onComplete }: AIProc
               </div>
             </div>
           )}
+          
+          {/* Skip Button */}
+          <div className="mt-6 text-center">
+            <Button 
+              variant="outline" 
+              onClick={() => onComplete({ participants: [], bill: null, split: null })}
+              className="text-sm"
+            >
+              Skip AI Processing
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
