@@ -2,7 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertBillSchema, insertParticipantSchema } from "@shared/schema";
+import { insertBillSchema, insertParticipantSchema, participants } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import QRCode from "qrcode";
 
 // Helper function to generate random menu items
@@ -113,13 +115,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/chillbill/participants/:participantId", async (req, res) => {
     try {
       const { participantId } = req.params;
-      const participantList = await db.select().from(participants).where(eq(participants.id, participantId));
+      const participant = await storage.getParticipantById(participantId);
       
-      if (participantList.length === 0) {
+      if (!participant) {
         return res.status(404).json({ message: "Participant not found" });
       }
       
-      res.json(participantList[0]);
+      res.json(participant);
     } catch (error) {
       console.error("Error fetching participant:", error);
       res.status(500).json({ message: "Failed to fetch participant", error });

@@ -13,6 +13,9 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(insertUser: InsertUser): Promise<User>;
   
+  // Individual participant method
+  getParticipantById(id: string): Promise<Participant | undefined>;
+  
   // Bill methods
   createBill(insertBill: InsertBill): Promise<Bill>;
   getBillById(id: string): Promise<Bill | undefined>;
@@ -98,6 +101,11 @@ export class DatabaseStorage implements IStorage {
 
   async getParticipantsByBillId(billId: string): Promise<Participant[]> {
     return await db.select().from(participants).where(eq(participants.billId, billId));
+  }
+
+  async getParticipantById(id: string): Promise<Participant | undefined> {
+    const [participant] = await db.select().from(participants).where(eq(participants.id, id));
+    return participant || undefined;
   }
 
   async getUnpaidParticipants(billId: string): Promise<Participant[]> {
