@@ -259,20 +259,20 @@ export default function BillDetail() {
         {/* Action Buttons */}
         <div className="space-y-3">
           <Button 
-            variant="outline"
-            className="w-full py-3"
+            className="w-full bg-primary text-white py-3 hover:bg-primary/90"
             onClick={() => sendRemindersMutation.mutate()}
             disabled={sendRemindersMutation.isPending || participants.length === 0}
           >
             <Bell className="w-4 h-4 mr-2" />
-            Send Payment Reminders
+            {sendRemindersMutation.isPending ? 'Sending Reminders...' : 'Send Payment Reminders'}
           </Button>
           <Button 
-            variant="ghost" 
-            className="w-full py-3"
-            onClick={() => setLocation('/')}
+            variant="outline" 
+            className="w-full py-3 border-primary text-primary hover:bg-primary/10"
+            onClick={() => setLocation('/create-bill')}
           >
-            Back to Dashboard
+            <Plus className="w-4 h-4 mr-2" />
+            Create New Bill
           </Button>
         </div>
       </div>
