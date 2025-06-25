@@ -47,20 +47,27 @@ export default function CreateBill() {
 
   const createBillMutation = useMutation({
     mutationFn: async (data: CreateBillForm) => {
-      const billData = {
-        ...data,
-        billDate: data.billDate // Send as string, backend will transform it
-      };
-      console.log('Sending bill data:', billData);
-      const result = await apiRequest('POST', '/api/chillbill/bills', billData);
-      console.log('API response result:', result);
-      
-      // Create participants with even split calculation
-      if (result.id && data.participantCount) {
-        await createParticipantsForBill(result.id, data.participantCount, parseFloat(data.totalAmount));
+      try {
+        const billData = {
+          ...data,
+          billDate: data.billDate // Send as string, backend will transform it
+        };
+        console.log('Sending bill data:', billData);
+        const result = await apiRequest('POST', '/api/chillbill/bills', billData);
+        console.log('API response result:', result);
+        
+        // Create participants with even split calculation
+        if (result.id && data.participantCount) {
+          console.log('Creating participants for bill:', result.id);
+          await createParticipantsForBill(result.id, data.participantCount, parseFloat(data.totalAmount));
+          console.log('Participants created successfully');
+        }
+        
+        return result;
+      } catch (error) {
+        console.error('Mutation error:', error);
+        throw error;
       }
-      
-      return result;
     },
     onSuccess: async (newBill) => {
       console.log('Bill created successfully - full response:', newBill);
@@ -87,13 +94,16 @@ export default function CreateBill() {
       
       // Navigate to participants page regardless of image upload
       console.log('Navigating to participants page for bill:', billId);
-      setLocation(`/bill/${billId}/participants`);
+      // Add a small delay to ensure database operations complete
+      setTimeout(() => {
+        setLocation(`/bill/${billId}/participants`);
+      }, 100);
     },
     onError: (error) => {
       console.error('Bill creation error:', error);
       toast({
-        title: "Error",
-        description: "Failed to create bill. Please try again.",
+        title: "Bill Creation Failed",
+        description: error?.message || "Failed to create bill. Please try again.",
         variant: "destructive",
       });
     }
@@ -139,6 +149,9 @@ export default function CreateBill() {
     const baseAmount = Math.floor((totalAmount / participantCount) * 100) / 100;
     const remainder = Math.round((totalAmount - (baseAmount * participantCount)) * 100) / 100;
     
+    console.log(`Creating ${participantCount} participants for bill ${billId}, total: $${totalAmount}`);
+    console.log(`Base amount: $${baseAmount}, remainder: $${remainder}`);
+    
     // Create participants
     for (let i = 0; i < participantCount; i++) {
       const isOwner = i === 0;
@@ -152,7 +165,14 @@ export default function CreateBill() {
         paymentStatus: isOwner ? 'paid' : 'pending'
       };
       
-      await apiRequest('POST', '/api/chillbill/participants', participantData);
+      console.log(`Creating participant ${i + 1}:`, participantData);
+      try {
+        const result = await apiRequest('POST', '/api/chillbill/participants', participantData);
+        console.log(`Participant ${i + 1} created:`, result);
+      } catch (error) {
+        console.error(`Failed to create participant ${i + 1}:`, error);
+        throw error;
+      }
     }
   };
 
