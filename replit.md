@@ -102,16 +102,16 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 25, 2025: Redesigned all screens with mobile app layout format - enhanced spacing, rounded corners, improved typography
+- June 25, 2025: Added comprehensive mobile-first CSS classes for consistent styling across components
+- June 25, 2025: Updated homepage with modern card-based layout and improved visual hierarchy
+- June 25, 2025: Enhanced create bill form with centered design and better visual feedback
+- June 25, 2025: Fixed participant selection page parameter extraction for shared links
 - June 25, 2025: Fixed bill detail page parameter extraction - changed from billId to id to match router configuration
 - June 25, 2025: Updated API calls in bill detail to use apiRequest helper and proper error handling
 - June 25, 2025: Enhanced QR code generation with shareable participant selection links and improved UI
 - June 25, 2025: Added comprehensive homepage with bill management dashboard and statistics
 - June 25, 2025: Fixed participant update API endpoints - corrected PATCH to PUT method and endpoint structure
-- June 25, 2025: Resolved data type validation for amountToPay field (string vs number)
-- June 25, 2025: Fixed critical API response parsing issue preventing bill creation navigation
-- June 25, 2025: Implemented participant count input with automatic even split calculation  
-- June 25, 2025: Added bill owner highlighting with crown badge in participant review
-- June 25, 2025: Fixed routing issues between bill creation and participant screens
 
 ## User Preferences
 
