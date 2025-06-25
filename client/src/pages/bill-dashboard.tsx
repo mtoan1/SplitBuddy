@@ -115,7 +115,9 @@ export default function BillDashboard() {
           </div>
         ) : (
           <div className="space-y-4">
-            {bills.map((bill: any) => {
+            {bills
+              .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+              .map((bill: any) => {
               const totalAmount = parseFloat(bill.totalAmount);
               return (
                 <Card 

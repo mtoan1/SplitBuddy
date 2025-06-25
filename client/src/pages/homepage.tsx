@@ -17,7 +17,9 @@ export default function Homepage() {
   });
 
   const bills = billsQuery.data || [];
-  const recentBills = bills.slice(0, 3); // Show only first 3 bills
+  const recentBills = bills
+    .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3); // Show only first 3 bills
 
   return (
     <div className="mobile-container">
