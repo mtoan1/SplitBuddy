@@ -240,7 +240,7 @@ export default function BillDetail() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white">Participants ({participants.length})</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Participants ({sortedParticipants?.length || 0})</h3>
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -253,7 +253,7 @@ export default function BillDetail() {
             </div>
             
             <div className="space-y-3">
-              {participants.length === 0 ? (
+              {(sortedParticipants?.length || 0) === 0 ? (
                 <div className="text-center py-8">
                   <Users className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                   <h4 className="font-medium text-gray-900 dark:text-white mb-2">No participants yet</h4>
@@ -267,7 +267,7 @@ export default function BillDetail() {
                   </Button>
                 </div>
               ) : (
-                participants.map((participant: any) => (
+                sortedParticipants?.map((participant: any) => (
                   <ParticipantCard
                     key={participant.id}
                     participant={participant}
