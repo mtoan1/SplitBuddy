@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, Home, Receipt, Copy } from "lucide-react";
+import { CheckCircle, Home, Receipt, Copy, Check, Download, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -83,10 +83,10 @@ export default function PaymentSuccess() {
     <div className="max-w-md mx-auto bg-white min-h-screen">
       <div className="p-4 space-y-6 text-center">
         <div className="py-8">
-          <div className="w-20 h-20 bg-success rounded-full flex items-center justify-center mx-auto mb-6">
-            <Check className="text-white text-2xl" />
+          <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="text-white w-12 h-12" />
           </div>
-          <h2 className="text-2xl font-bold text-text-primary mb-3">Payment Successful!</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Payment Successful!</h2>
           <p className="text-gray-600 mb-6">Your payment has been processed successfully</p>
           
           {/* Payment Summary */}
