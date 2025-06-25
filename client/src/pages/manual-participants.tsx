@@ -51,6 +51,73 @@ export default function ManualParticipants() {
     }
   });
 
+  // Auto-split logic
+  const autoSplitAmounts = () => {
+    const currentParticipants = form.getValues('participants');
+    const billTotal = parseFloat(billQuery.data?.totalAmount || '0');
+    
+    if (currentParticipants.length === 0 || billTotal === 0) return;
+    
+    const baseAmount = Math.floor((billTotal / currentParticipants.length) * 100) / 100;
+    const remainder = Math.round((billTotal - (baseAmount * currentParticipants.length)) * 100) / 100;
+    
+    const updatedParticipants = currentParticipants.map((participant, index) => ({
+      ...participant,
+      amountToPay: (index === 0 ? baseAmount + remainder : baseAmount).toFixed(2)
+    }));
+    
+    form.setValue('participants', updatedParticipants);
+  };
+
+  // Smart split when someone pays more
+  const handleAmountChange = (index: number, newAmount: string) => {
+    const currentParticipants = form.getValues('participants');
+    const billTotal = parseFloat(billQuery.data?.totalAmount || '0');
+    const amount = parseFloat(newAmount) || 0;
+    
+    // Prevent exceeding total
+    if (amount > billTotal) {
+      toast({
+        title: "Invalid Amount",
+        description: "Amount cannot exceed the total bill amount.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Update the current participant
+    const updatedParticipants = [...currentParticipants];
+    updatedParticipants[index] = { ...updatedParticipants[index], amountToPay: newAmount };
+    
+    // Calculate remaining amount to split among others
+    const totalAssigned = updatedParticipants.reduce((sum, p, i) => {
+      if (i === index) return sum + amount; // Use new amount for current participant
+      return sum + (parseFloat(p.amountToPay) || 0);
+    }, 0);
+    
+    const remaining = billTotal - totalAssigned;
+    const otherParticipants = updatedParticipants.filter((_, i) => i !== index);
+    
+    if (otherParticipants.length > 0 && remaining > 0) {
+      const splitAmount = Math.floor((remaining / otherParticipants.length) * 100) / 100;
+      const splitRemainder = Math.round((remaining - (splitAmount * otherParticipants.length)) * 100) / 100;
+      
+      let remainderIndex = 0;
+      updatedParticipants.forEach((participant, i) => {
+        if (i !== index) {
+          const extra = remainderIndex === 0 ? splitRemainder : 0;
+          updatedParticipants[i] = {
+            ...participant,
+            amountToPay: (splitAmount + extra).toFixed(2)
+          };
+          remainderIndex++;
+        }
+      });
+    }
+    
+    form.setValue('participants', updatedParticipants);
+  };
+
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "participants"
@@ -251,6 +318,10 @@ export default function ManualParticipants() {
                               step="0.01"
                               placeholder="0.00"
                               className={`mobile-input ${isOwner ? 'font-bold text-primary' : ''}`}
+                              onChange={(e) => {
+                                form.register(`participants.${index}.amountToPay`).onChange(e);
+                                handleAmountChange(index, e.target.value);
+                              }}
                             />
                             {form.formState.errors.participants?.[index]?.amountToPay && (
                               <p className="text-xs text-red-500 mt-1">
@@ -279,6 +350,28 @@ export default function ManualParticipants() {
                 </CardContent>
               </Card>
 
+              {/* Summary Card */}
+              <Card className="mobile-card bg-gray-50 dark:bg-gray-800/50">
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Bill Total:</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(billTotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Total Assigned:</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(totalAssigned)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm border-t pt-2">
+                      <span className="text-gray-600 dark:text-gray-400">Remaining:</span>
+                      <span className={`font-bold ${Math.abs(remaining) > 0.01 ? 'text-red-500' : 'text-green-600'}`}>
+                        {formatCurrency(remaining)}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               <div className="space-y-3">
                 <Button
                   type="submit"
@@ -289,9 +382,11 @@ export default function ManualParticipants() {
                 </Button>
                 
                 {Math.abs(remaining) > 0.01 && (
-                  <p className="text-sm text-center text-red-500">
-                    Please adjust amounts so they total exactly {formatCurrency(billTotal)}
-                  </p>
+                  <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                    <p className="text-sm text-red-700 dark:text-red-300 text-center">
+                      Please adjust amounts so they total exactly {formatCurrency(billTotal)}
+                    </p>
+                  </div>
                 )}
               </div>
             </form>
