@@ -64,20 +64,19 @@ export default function CreateBill() {
     onSuccess: async (newBill) => {
       setCreatedBillId(newBill.id);
       
-      // Always show success message first
+      queryClient.invalidateQueries({ queryKey: ['/api/chillbill/bills'] });
+      
       toast({
-        title: "Bill Created",
-        description: "Your bill has been created successfully!",
+        title: "Bill Created Successfully",
+        description: `${form.getValues('participantCount')} participants created with even split`,
       });
       
-      // If images were uploaded, start AI processing, otherwise go directly to bill page
+      // If images were uploaded, start AI processing, otherwise go to participants page
       if (billImage || groupImage) {
         setShowAIProcessing(true);
       } else {
-        // No images uploaded, redirect to manual participant addition
-        setTimeout(() => {
-          setLocation(`/bill/${newBill.id}/add-participants`);
-        }, 1000);
+        // Navigate to participants review page
+        setLocation(`/bill/${newBill.id}/participants`);
       }
     },
     onError: (error) => {
@@ -155,7 +154,7 @@ export default function CreateBill() {
     });
     
     if (createdBillId) {
-      setLocation(`/bill/${createdBillId}/detail`);
+      setLocation(`/bill/${createdBillId}/participants`);
     }
   };
 

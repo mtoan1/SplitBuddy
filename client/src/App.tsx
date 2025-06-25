@@ -17,7 +17,7 @@ function Router() {
     <Switch>
       <Route path="/" component={BillDashboard} />
       <Route path="/create" component={CreateBill} />
-      <Route path="/bill/:billId/add-participants" component={ManualParticipants} />
+      <Route path="/bill/:id/participants" component={ManualParticipants} />
       <Route path="/bill/:billId/detail" component={BillDetail} />
       <Route path="/bill/:billId" component={ParticipantSelection} />
       <Route path="/bill/:billId/pay/:participantId" component={PaymentScreen} />
