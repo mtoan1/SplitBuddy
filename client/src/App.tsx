@@ -22,8 +22,8 @@ function Router() {
       <Route path="/bill/:id/participants" component={ManualParticipants} />
       <Route path="/bill/:id" component={BillDetail} />
       <Route path="/participant-selection/:id" component={ParticipantSelection} />
-      <Route path="/payment/:billId/:participantId" component={PaymentScreen} />
-      <Route path="/payment-success/:billId" component={PaymentSuccess} />
+      <Route path="/payment/:billId/:participantId" component={PaymentFlow} />
+      <Route path="/payment-success/:billId/:participantId" component={PaymentSuccess} />
       <Route component={NotFound} />
     </Switch>
   );

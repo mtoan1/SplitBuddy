@@ -1,7 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Clock, AlertCircle } from "lucide-react";
-import { formatCurrency, getInitials } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, Clock, XCircle, AlertTriangle, CreditCard } from "lucide-react";
+import { formatCurrency, getInitials, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 interface ParticipantCardProps {
@@ -82,12 +83,32 @@ export default function ParticipantCard({
           {phone && <p className="text-xs text-gray-500">{phone}</p>}
         </div>
       </div>
-      <div className="text-right">
-        <p className={cn("font-semibold", config.textColor)}>{formatCurrency(amount)}</p>
-        <div className={cn("flex items-center text-xs", config.textColor)}>
-          <StatusIcon className="w-3 h-3 mr-1" />
-          <span>{config.label}</span>
+      <div className="flex items-center space-x-2">
+        <div className="text-right">
+          <p className={cn("font-semibold", config.textColor)}>{formatCurrency(amount)}</p>
+          <div className={cn("flex items-center text-xs", config.textColor)}>
+            <StatusIcon className="w-3 h-3 mr-1" />
+            <span>{config.label}</span>
+          </div>
+          {participant.paidAt && (
+            <div className="text-xs text-gray-500 mt-1">
+              {formatDate(participant.paidAt)}
+            </div>
+          )}
         </div>
+        {showPayButton && paymentStatus === 'pending' && onPayClick && (
+          <Button
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPayClick(participant.id);
+            }}
+            className="bg-primary hover:bg-primary/90 text-white"
+          >
+            <CreditCard className="w-3 h-3 mr-1" />
+            Pay
+          </Button>
+        )}
       </div>
     </div>
   );

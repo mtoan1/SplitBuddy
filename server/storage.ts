@@ -122,10 +122,16 @@ export class DatabaseStorage implements IStorage {
     await db.delete(participants).where(eq(participants.id, id));
   }
 
-  async markParticipantAsPaid(id: string): Promise<Participant | undefined> {
+  async markParticipantAsPaid(id: string, paymentMethod: string = 'mock'): Promise<Participant | undefined> {
     const [participant] = await db
       .update(participants)
-      .set({ paymentStatus: 'paid', updatedAt: new Date() })
+      .set({ 
+        paymentStatus: 'paid',
+        paidAt: new Date(),
+        paymentMethod,
+        transactionId: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        updatedAt: new Date()
+      })
       .where(eq(participants.id, id))
       .returning();
     return participant || undefined;
