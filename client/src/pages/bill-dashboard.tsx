@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -16,6 +17,7 @@ const MOCK_BILL_ID = "demo-bill-1";
 
 export default function BillDashboard() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   
   // Initialize demo data
   useEffect(() => {
@@ -26,13 +28,15 @@ export default function BillDashboard() {
         
         if (!response.ok) {
           // Create demo bill
-          await apiRequest('POST', '/api/chillbill/bills', {
+          const newBill = await apiRequest('POST', '/api/chillbill/bills', {
             creatorId: 'demo-user',
             totalAmount: '124.50',
             merchantName: 'Olive Garden',
-            billDate: new Date().toISOString(),
-            status: 'active'
+            billDate: new Date().toISOString()
           });
+
+          // Update the bill ID to use the created bill's ID
+          const billId = newBill.id || MOCK_BILL_ID;
 
           // Add demo participants
           const participants = [
@@ -43,8 +47,7 @@ export default function BillDashboard() {
           ];
 
           for (const participant of participants) {
-            await apiRequest('POST', `/api/chillbill/bills/${MOCK_BILL_ID}/participants`, {
-              billId: MOCK_BILL_ID,
+            await apiRequest('POST', `/api/chillbill/bills/${billId}/participants`, {
               ...participant
             });
           }
@@ -201,13 +204,21 @@ export default function BillDashboard() {
         <div className="space-y-3">
           <Button 
             className="w-full bg-primary text-white py-3 hover:bg-primary/90"
+            onClick={() => setLocation('/create')}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create New Bill
+          </Button>
+          <Button 
+            variant="outline"
+            className="w-full py-3"
             onClick={() => sendRemindersMutation.mutate()}
             disabled={sendRemindersMutation.isPending}
           >
             <Bell className="w-4 h-4 mr-2" />
             Send Reminders
           </Button>
-          <Button variant="outline" className="w-full py-3">
+          <Button variant="ghost" className="w-full py-3">
             <Receipt className="w-4 h-4 mr-2" />
             View Bill Details
           </Button>

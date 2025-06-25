@@ -227,6 +227,130 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Image Processing Endpoints
+  app.post("/api/chillbill/bills/:billId/bill-image", async (req, res) => {
+    try {
+      // Mock AI service for bill processing
+      const mockBillData = {
+        totalAmount: 124.50,
+        merchantName: "Olive Garden",
+        billDate: new Date().toISOString(),
+        items: [
+          { name: "Chicken Alfredo", price: 18.99 },
+          { name: "Caesar Salad", price: 12.50 },
+          { name: "Breadsticks", price: 6.99 },
+          { name: "Drinks", price: 24.95 },
+          { name: "Tax & Tip", price: 20.07 }
+        ]
+      };
+
+      // Update bill with extracted data
+      await storage.updateBill(req.params.billId, {
+        totalAmount: mockBillData.totalAmount.toString(),
+        merchantName: mockBillData.merchantName,
+        aiProcessed: true,
+        billImagePath: `/uploads/bill-${req.params.billId}.jpg`
+      });
+
+      res.json({ 
+        message: "Bill image processed successfully",
+        extractedData: mockBillData,
+        processed: true
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to process bill image", error });
+    }
+  });
+
+  app.post("/api/chillbill/bills/:billId/group-image", async (req, res) => {
+    try {
+      // Mock AI service for face recognition
+      const mockParticipants = [
+        { name: "Alice Smith", confidence: 0.95, faceId: "face_001" },
+        { name: "Bob Johnson", confidence: 0.92, faceId: "face_002" },
+        { name: "Carol Williams", confidence: 0.88, faceId: "face_003" },
+        { name: "David Miller", confidence: 0.91, faceId: "face_004" }
+      ];
+
+      // Add participants to bill
+      for (const participant of mockParticipants) {
+        await storage.createParticipant({
+          billId: req.params.billId,
+          name: participant.name,
+          aiFaceId: participant.faceId,
+          paymentStatus: 'pending'
+        });
+      }
+
+      // Update bill
+      await storage.updateBill(req.params.billId, {
+        groupImagePath: `/uploads/group-${req.params.billId}.jpg`
+      });
+
+      res.json({
+        message: "Group image processed successfully",
+        participants: mockParticipants,
+        processed: true
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to process group image", error });
+    }
+  });
+
+  app.get("/api/chillbill/bills/:billId/processing-status", async (req, res) => {
+    try {
+      const bill = await storage.getBillById(req.params.billId);
+      if (!bill) {
+        return res.status(404).json({ message: "Bill not found" });
+      }
+
+      res.json({
+        billProcessed: bill.aiProcessed || false,
+        groupProcessed: !!bill.groupImagePath,
+        status: bill.aiProcessed ? 'completed' : 'processing'
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get processing status", error });
+    }
+  });
+
+  // AI Callback endpoints (internal)
+  app.post("/api/chillbill/internal/bills/:billId/bill-result", async (req, res) => {
+    try {
+      const { totalAmount, merchantName, billDate, items } = req.body;
+      
+      await storage.updateBill(req.params.billId, {
+        totalAmount: totalAmount.toString(),
+        merchantName,
+        billDate: new Date(billDate),
+        aiProcessed: true
+      });
+
+      res.json({ message: "Bill data updated successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update bill data", error });
+    }
+  });
+
+  app.post("/api/chillbill/internal/bills/:billId/group-result", async (req, res) => {
+    try {
+      const { participants } = req.body;
+      
+      for (const participant of participants) {
+        await storage.createParticipant({
+          billId: req.params.billId,
+          name: participant.name,
+          aiFaceId: participant.faceId,
+          paymentStatus: 'pending'
+        });
+      }
+
+      res.json({ message: "Participants added successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to add participants", error });
+    }
+  });
+
   // Mock payment processing
   app.post("/api/chillbill/process-payment", async (req, res) => {
     try {
