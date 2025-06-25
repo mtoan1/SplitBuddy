@@ -18,7 +18,8 @@ import AIProcessingModal from "@/components/ai-processing-modal";
 const createBillFormSchema = insertBillSchema.extend({
   totalAmount: z.string().min(1, "Total amount is required"),
   merchantName: z.string().min(1, "Merchant name is required"),
-  billDate: z.string().min(1, "Bill date is required")
+  billDate: z.string().min(1, "Bill date is required"),
+  participantCount: z.number().min(2, "Must have at least 2 participants").max(20, "Maximum 20 participants")
 });
 
 type CreateBillForm = z.infer<typeof createBillFormSchema>;
@@ -39,7 +40,8 @@ export default function CreateBill() {
       merchantName: '',
       billDate: new Date().toISOString().split('T')[0],
       status: 'created',
-      splitMethod: 'equal'
+      splitMethod: 'equal',
+      participantCount: 2
     }
   });
 
@@ -50,7 +52,14 @@ export default function CreateBill() {
         billDate: data.billDate // Send as string, backend will transform it
       };
       console.log('Sending bill data:', billData);
-      return apiRequest('POST', '/api/chillbill/bills', billData);
+      const result = await apiRequest('POST', '/api/chillbill/bills', billData);
+      
+      // Create participants with even split calculation
+      if (result.id && data.participantCount) {
+        await createParticipantsForBill(result.id, data.participantCount, parseFloat(data.totalAmount));
+      }
+      
+      return result;
     },
     onSuccess: async (newBill) => {
       setCreatedBillId(newBill.id);
@@ -101,6 +110,41 @@ export default function CreateBill() {
     console.log('Form submitted with data:', data);
     console.log('Form errors:', form.formState.errors);
     createBillMutation.mutate(data);
+  };
+
+  const createParticipantsForBill = async (billId: string, participantCount: number, totalAmount: number) => {
+    const mockNames = [
+      "Alex Chen", "Sarah Johnson", "Mike Rodriguez", "Emily Davis", "Jordan Kim",
+      "Taylor Brown", "Casey Wilson", "Morgan Lee", "Riley Martinez", "Jamie Thompson",
+      "Avery Garcia", "Quinn Anderson", "Dakota Miller", "Sage Jackson", "River White"
+    ];
+    
+    const mockPhones = [
+      "+1 (555) 123-4567", "+1 (555) 234-5678", "+1 (555) 345-6789", "+1 (555) 456-7890",
+      "+1 (555) 567-8901", "+1 (555) 678-9012", "+1 (555) 789-0123", "+1 (555) 890-1234",
+      "+1 (555) 901-2345", "+1 (555) 012-3456", "+1 (555) 123-0987", "+1 (555) 234-8765",
+      "+1 (555) 345-7654", "+1 (555) 456-6543", "+1 (555) 567-5432"
+    ];
+
+    // Calculate even split with rounding rules
+    const baseAmount = Math.floor((totalAmount / participantCount) * 100) / 100;
+    const remainder = Math.round((totalAmount - (baseAmount * participantCount)) * 100) / 100;
+    
+    // Create participants
+    for (let i = 0; i < participantCount; i++) {
+      const isOwner = i === 0;
+      const amountToPay = isOwner ? baseAmount + remainder : baseAmount;
+      
+      const participantData = {
+        billId,
+        name: mockNames[i % mockNames.length],
+        phone: mockPhones[i % mockPhones.length],
+        amountToPay: amountToPay.toFixed(2),
+        paymentStatus: isOwner ? 'paid' : 'pending'
+      };
+      
+      await apiRequest('POST', '/api/chillbill/participants', participantData);
+    }
   };
 
   const handleAIProcessingComplete = (processedData: any) => {
@@ -167,18 +211,37 @@ export default function CreateBill() {
                 )}
               </div>
 
-              <div>
-                <Label htmlFor="billDate">Date</Label>
-                <Input
-                  id="billDate"
-                  type="date"
-                  {...form.register('billDate')}
-                />
-                {form.formState.errors.billDate && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {form.formState.errors.billDate.message}
-                  </p>
-                )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="participantCount">Number of People</Label>
+                  <Input
+                    id="participantCount"
+                    type="number"
+                    min="2"
+                    max="20"
+                    placeholder="2"
+                    {...form.register('participantCount', { valueAsNumber: true })}
+                  />
+                  {form.formState.errors.participantCount && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {form.formState.errors.participantCount.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="billDate">Date</Label>
+                  <Input
+                    id="billDate"
+                    type="date"
+                    {...form.register('billDate')}
+                  />
+                  {form.formState.errors.billDate && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {form.formState.errors.billDate.message}
+                    </p>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
