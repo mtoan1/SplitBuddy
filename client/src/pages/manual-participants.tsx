@@ -83,17 +83,17 @@ export default function ManualParticipants() {
 
         if (participantsQuery.data && participantsQuery.data[i]) {
           // Update existing participant
-          await apiRequest('PATCH', `/api/chillbill/participants/${participantsQuery.data[i].id}`, participantData);
+          await apiRequest('PUT', `/api/chillbill/bills/${billId}/participants/${participantsQuery.data[i].id}`, participantData);
         } else {
           // Create new participant
-          await apiRequest('POST', '/api/chillbill/participants', participantData);
+          await apiRequest('POST', `/api/chillbill/bills/${billId}/participants`, participantData);
         }
       }
 
       // Remove extra participants if any
       if (participantsQuery.data && participantsQuery.data.length > data.participants.length) {
         for (let i = data.participants.length; i < participantsQuery.data.length; i++) {
-          await apiRequest('DELETE', `/api/chillbill/participants/${participantsQuery.data[i].id}`);
+          await apiRequest('DELETE', `/api/chillbill/bills/${billId}/participants/${participantsQuery.data[i].id}`);
         }
       }
     },
