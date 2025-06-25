@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Bell, Receipt, User } from "lucide-react";
+import { Plus, Bell, Receipt, User, Users } from "lucide-react";
 import QRCodeDisplay from "@/components/qr-code-display";
 import ParticipantCard from "@/components/participant-card";
 import { formatCurrency, formatDate, calculatePaidPercentage, calculateTotalPaid } from "@/lib/utils";
@@ -176,19 +176,39 @@ export default function BillDashboard() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-text-primary">Participants ({participants.length})</h3>
-              <Button variant="ghost" size="sm" className="text-primary">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-primary"
+                onClick={() => setLocation(`/bill/${DEMO_BILL_ID}/add-participants`)}
+              >
                 <Plus className="w-4 h-4 mr-1" />
                 Add
               </Button>
             </div>
             
             <div className="space-y-3">
-              {participants.map((participant: any) => (
-                <ParticipantCard
-                  key={participant.id}
-                  participant={participant}
-                />
-              ))}
+              {participants.length === 0 ? (
+                <div className="text-center py-8">
+                  <Users className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <h4 className="font-medium text-text-primary mb-2">No participants yet</h4>
+                  <p className="text-sm text-gray-600 mb-4">Add people to split this bill</p>
+                  <Button 
+                    className="bg-primary text-white hover:bg-primary/90"
+                    onClick={() => setLocation(`/bill/${DEMO_BILL_ID}/add-participants`)}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Participants
+                  </Button>
+                </div>
+              ) : (
+                participants.map((participant: any) => (
+                  <ParticipantCard
+                    key={participant.id}
+                    participant={participant}
+                  />
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
