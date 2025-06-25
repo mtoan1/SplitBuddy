@@ -116,25 +116,42 @@ export default function PaymentSuccess() {
           <div className="space-y-3">
             <Button 
               className="w-full bg-primary text-white py-3 hover:bg-primary/90"
-              onClick={handleDownloadReceipt}
+              onClick={() => setLocation(`/bill/${billId}`)}
             >
-              <Download className="w-4 h-4 mr-2" />
-              Download Receipt
+              <Receipt className="w-4 h-4 mr-2" />
+              View Bill Details
             </Button>
+            
+            <div className="flex space-x-2">
+              <Button 
+                onClick={handleShareReceipt}
+                variant="outline"
+                className="flex-1"
+                size="sm"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Share
+              </Button>
+              
+              <Button 
+                onClick={handleDownloadReceipt}
+                variant="outline"
+                className="flex-1"
+                size="sm"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+            </div>
+            
             <Button 
-              variant="outline" 
-              className="w-full py-3"
-              onClick={handleShareReceipt}
-            >
-              <Share2 className="w-4 h-4 mr-2" />
-              Share Receipt
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full py-3"
               onClick={() => setLocation('/')}
+              variant="ghost"
+              className="w-full"
+              size="sm"
             >
-              Back to Dashboard
+              <Home className="w-4 h-4 mr-2" />
+              Go Home
             </Button>
           </div>
         </div>
