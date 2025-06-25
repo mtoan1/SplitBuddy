@@ -30,6 +30,13 @@ export default function BillDetail() {
     enabled: !!billId,
   });
 
+  const { data: paymentStatus } = useQuery({
+    queryKey: ['/api/chillbill/bills', billId, 'payment-status'],
+    queryFn: () => apiRequest('GET', `/api/chillbill/bills/${billId}/payment-status`),
+    enabled: !!billId,
+    refetchInterval: 5000, // Refresh every 5 seconds
+  });
+
   const sendRemindersMutation = useMutation({
     mutationFn: () => apiRequest('POST', `/api/chillbill/bills/${billId}/send-reminders`, {}),
     onSuccess: () => {
@@ -46,6 +53,10 @@ export default function BillDetail() {
       });
     }
   });
+
+  const handlePayClick = (participantId: string) => {
+    setLocation(`/payment/${billId}/${participantId}`);
+  };
 
   const handleShare = async () => {
     const shareUrl = `${window.location.origin}/bill/${billId}`;
@@ -120,9 +131,10 @@ export default function BillDetail() {
     );
   }
 
-  const totalAmount = parseFloat(bill?.totalAmount || '0');
-  const paidPercentage = calculatePaidPercentage(participants);
-  const totalPaid = calculateTotalPaid(participants);
+  // Calculate totals and payment progress
+  const totalAmount = paymentStatus?.totalAmount || participants.reduce((sum, p) => sum + parseFloat(p.amountToPay), 0);
+  const paidPercentage = paymentStatus?.paidPercentage || calculatePaidPercentage(participants);
+  const totalPaid = paymentStatus?.paidAmount || calculateTotalPaid(participants);
   const shareUrl = `${window.location.origin}/bill/${billId}`;
 
   return (
