@@ -102,6 +102,8 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 25, 2025: Changed primary color from green to neon pink (#ff37a5) as requested by user
+- June 25, 2025: Fixed app compilation errors - removed broken JSX fragments and Card import issues
 - June 25, 2025: Standardized mobile layout sizing from max-w-sm to max-w-md across all screens for consistency
 - June 25, 2025: Implemented Cake's neon color palette (neon pink #ff37a5, deep blue #271d7a) with modern flat design
 - June 25, 2025: Added neon glow effects, gradients, and enhanced visual styling throughout the interface
