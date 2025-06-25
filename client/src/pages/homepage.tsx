@@ -170,6 +170,16 @@ export default function Homepage() {
             )}
           </div>
         </div>
+        {/* Cake Banner */}
+        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="relative overflow-hidden rounded-2xl">
+            <img 
+              src="https://cake.vn/_next/image?url=https%3A%2F%2Fstorage.googleapis.com%2Fcake-prd-website%2Fhomepage%2FUntitled_3_f622d547fd%2FUntitled_3_f622d547fd.webp&w=1080&q=100"
+              alt="Cake Banner"
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        </div>
         
         {/* Bottom Spacing */}
         <div className="pb-8"></div>
