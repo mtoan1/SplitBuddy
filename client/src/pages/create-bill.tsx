@@ -161,13 +161,13 @@ export default function CreateBill() {
         billId,
         name: mockNames[i % mockNames.length],
         phone: mockPhones[i % mockPhones.length],
-        amountToPay: amountToPay.toFixed(2),
+        amountToPay: amountToPay.toString(),
         paymentStatus: isOwner ? 'paid' : 'pending'
       };
       
       console.log(`Creating participant ${i + 1}:`, participantData);
       try {
-        const result = await apiRequest('POST', '/api/chillbill/participants', participantData);
+        const result = await apiRequest('POST', `/api/chillbill/bills/${billId}/participants`, participantData);
         console.log(`Participant ${i + 1} created:`, result);
       } catch (error) {
         console.error(`Failed to create participant ${i + 1}:`, error);
