@@ -102,6 +102,7 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 25, 2025: Fixed split amount logic - manual changes preserved until "Redistribute" button clicked
 - June 25, 2025: Added smart split amount editing with equal distribution and validation
 - June 25, 2025: Updated bill dashboard to show real bills from API instead of hardcoded demo data
 - June 25, 2025: Updated participant generation to use Vietnamese names (Toan, Hung, Tue, An, etc.)

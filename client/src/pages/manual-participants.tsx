@@ -69,53 +69,54 @@ export default function ManualParticipants() {
     form.setValue('participants', updatedParticipants);
   };
 
-  // Smart split when someone pays more
-  const handleAmountChange = (index: number, newAmount: string) => {
+  // Redistribute remaining amount among participants without custom amounts
+  const redistributeRemaining = () => {
     const currentParticipants = form.getValues('participants');
     const billTotal = parseFloat(billQuery.data?.totalAmount || '0');
-    const amount = parseFloat(newAmount) || 0;
     
-    // Prevent exceeding total
+    if (currentParticipants.length === 0 || billTotal === 0) return;
+    
+    // Calculate total of all current amounts
+    const totalAssigned = currentParticipants.reduce((sum, p) => sum + (parseFloat(p.amountToPay) || 0), 0);
+    const remaining = billTotal - totalAssigned;
+    
+    if (remaining !== 0 && currentParticipants.length > 0) {
+      // Distribute remaining equally among all participants
+      const additionalPerPerson = Math.floor((remaining / currentParticipants.length) * 100) / 100;
+      const redistributionRemainder = Math.round((remaining - (additionalPerPerson * currentParticipants.length)) * 100) / 100;
+      
+      const updatedParticipants = currentParticipants.map((participant, index) => {
+        const currentAmount = parseFloat(participant.amountToPay) || 0;
+        const extra = index === 0 ? redistributionRemainder : 0;
+        return {
+          ...participant,
+          amountToPay: (currentAmount + additionalPerPerson + extra).toFixed(2)
+        };
+      });
+      
+      form.setValue('participants', updatedParticipants);
+      
+      toast({
+        title: "Amounts Redistributed",
+        description: `Remaining ${formatCurrency(Math.abs(remaining))} has been ${remaining > 0 ? 'added to' : 'deducted from'} all participants equally.`,
+      });
+    }
+  };
+
+  // Validate amount doesn't exceed total
+  const validateAmount = (newAmount: string) => {
+    const amount = parseFloat(newAmount) || 0;
+    const billTotal = parseFloat(billQuery.data?.totalAmount || '0');
+    
     if (amount > billTotal) {
       toast({
         title: "Invalid Amount",
         description: "Amount cannot exceed the total bill amount.",
         variant: "destructive",
       });
-      return;
+      return false;
     }
-    
-    // Update the current participant
-    const updatedParticipants = [...currentParticipants];
-    updatedParticipants[index] = { ...updatedParticipants[index], amountToPay: newAmount };
-    
-    // Calculate remaining amount to split among others
-    const totalAssigned = updatedParticipants.reduce((sum, p, i) => {
-      if (i === index) return sum + amount; // Use new amount for current participant
-      return sum + (parseFloat(p.amountToPay) || 0);
-    }, 0);
-    
-    const remaining = billTotal - totalAssigned;
-    const otherParticipants = updatedParticipants.filter((_, i) => i !== index);
-    
-    if (otherParticipants.length > 0 && remaining > 0) {
-      const splitAmount = Math.floor((remaining / otherParticipants.length) * 100) / 100;
-      const splitRemainder = Math.round((remaining - (splitAmount * otherParticipants.length)) * 100) / 100;
-      
-      let remainderIndex = 0;
-      updatedParticipants.forEach((participant, i) => {
-        if (i !== index) {
-          const extra = remainderIndex === 0 ? splitRemainder : 0;
-          updatedParticipants[i] = {
-            ...participant,
-            amountToPay: (splitAmount + extra).toFixed(2)
-          };
-          remainderIndex++;
-        }
-      });
-    }
-    
-    form.setValue('participants', updatedParticipants);
+    return true;
   };
 
   const { fields, append, remove } = useFieldArray({
@@ -319,8 +320,11 @@ export default function ManualParticipants() {
                               placeholder="0.00"
                               className={`mobile-input ${isOwner ? 'font-bold text-primary' : ''}`}
                               onChange={(e) => {
-                                form.register(`participants.${index}.amountToPay`).onChange(e);
-                                handleAmountChange(index, e.target.value);
+                                if (validateAmount(e.target.value)) {
+                                  form.register(`participants.${index}.amountToPay`).onChange(e);
+                                } else {
+                                  e.target.value = form.getValues(`participants.${index}.amountToPay`);
+                                }
                               }}
                             />
                             {form.formState.errors.participants?.[index]?.amountToPay && (
@@ -382,9 +386,10 @@ export default function ManualParticipants() {
                 </Button>
                 
                 {Math.abs(remaining) > 0.01 && (
-                  <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                    <p className="text-sm text-red-700 dark:text-red-300 text-center">
-                      Please adjust amounts so they total exactly {formatCurrency(billTotal)}
+                  <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                    <p className="text-sm text-amber-700 dark:text-amber-300 text-center">
+                      {remaining > 0 ? 'Under-allocated by' : 'Over-allocated by'} {formatCurrency(Math.abs(remaining))}. 
+                      Use "Redistribute" to balance automatically or adjust amounts manually.
                     </p>
                   </div>
                 )}
