@@ -95,19 +95,19 @@ export default function PaymentSuccess() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Amount Paid</span>
-                  <span className="text-text-primary font-semibold">
+                  <span className="text-gray-900 dark:text-white font-semibold">
                     {formatCurrency(transactionData.amount)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Transaction ID</span>
-                  <span className="text-text-primary font-mono text-sm">
+                  <span className="text-gray-900 dark:text-white font-mono text-sm">
                     #{transactionData.transactionId}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Date</span>
-                  <span className="text-text-primary">{transactionData.date}</span>
+                  <span className="text-gray-900 dark:text-white">{transactionData.date}</span>
                 </div>
               </div>
             </CardContent>
