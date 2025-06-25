@@ -164,15 +164,15 @@ export default function BillDetail() {
         <Card className="mobile-card">
           <CardContent className="p-4">
             <div className="text-center mb-4">
-              <p className="text-3xl font-bold text-text-primary">{formatCurrency(totalAmount)}</p>
-              <p className="text-sm text-gray-600">Total Amount</p>
+              <p className="text-3xl font-bold text-primary">{formatCurrency(totalAmount)}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Total Amount</p>
             </div>
             
             {/* Progress Bar */}
             <div className="mb-4">
               <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-600">Payment Progress</span>
-                <span className="text-text-primary font-medium">
+                <span className="text-gray-600 dark:text-gray-400">Payment Progress</span>
+                <span className="text-primary font-medium">
                   {paidPercentage}% ({formatCurrency(totalPaid)})
                 </span>
               </div>
@@ -187,7 +187,7 @@ export default function BillDetail() {
         {/* Sharing Options */}
         <Card>
           <CardContent className="p-4">
-            <h3 className="font-semibold text-text-primary mb-3">Share with Friends</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Share with Friends</h3>
             <div className="space-y-3">
               <Button 
                 variant="outline" 

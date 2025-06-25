@@ -82,7 +82,7 @@ export default function QRCodeDisplay({ billId }: QRCodeDisplayProps) {
     return (
       <Card>
         <CardContent className="flex items-center justify-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#5BC5A7]"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           <span className="ml-2 text-gray-600">Generating QR code...</span>
         </CardContent>
       </Card>
@@ -115,7 +115,7 @@ export default function QRCodeDisplay({ billId }: QRCodeDisplayProps) {
             <QrCode className="w-5 h-5 mr-2" />
             Share Bill
           </div>
-          <Badge variant="secondary" className="bg-[#5BC5A7] text-white">
+          <Badge variant="secondary" className="bg-primary text-white">
             {formatCurrency(parseFloat(qrData.totalAmount))}
           </Badge>
         </CardTitle>
@@ -144,7 +144,7 @@ export default function QRCodeDisplay({ billId }: QRCodeDisplayProps) {
         <div className="space-y-3">
           <Button 
             onClick={shareLink}
-            className="w-full bg-[#5BC5A7] hover:bg-[#4FAD9A] text-white"
+            className="w-full bg-primary hover:bg-primary/90 text-white"
             size="lg"
           >
             <Share2 className="w-4 h-4 mr-2" />
@@ -156,6 +156,7 @@ export default function QRCodeDisplay({ billId }: QRCodeDisplayProps) {
               onClick={copyToClipboard}
               variant="outline"
               size="sm"
+              className="border-primary text-primary hover:bg-primary/10"
             >
               <Copy className="w-4 h-4 mr-1" />
               Copy
@@ -165,6 +166,7 @@ export default function QRCodeDisplay({ billId }: QRCodeDisplayProps) {
               onClick={downloadQR}
               variant="outline"
               size="sm"
+              className="border-primary text-primary hover:bg-primary/10"
             >
               <Download className="w-4 h-4 mr-1" />
               Save
@@ -174,6 +176,7 @@ export default function QRCodeDisplay({ billId }: QRCodeDisplayProps) {
               onClick={openLink}
               variant="outline"
               size="sm"
+              className="border-primary text-primary hover:bg-primary/10"
             >
               <ExternalLink className="w-4 h-4 mr-1" />
               Open
