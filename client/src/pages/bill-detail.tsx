@@ -92,17 +92,15 @@ export default function BillDetail() {
 
   if (billLoading || participantsLoading) {
     return (
-      <div className="max-w-md mx-auto bg-white min-h-screen">
-        <div className="p-4 space-y-6">
+      <div className="mobile-container">
+        <div className="mobile-content">
           <Skeleton className="h-8 w-48" />
-          <Card>
-            <CardContent className="p-4">
-              <Skeleton className="h-6 w-32 mb-2" />
-              <Skeleton className="h-4 w-24 mb-4" />
-              <Skeleton className="h-8 w-20 mb-4" />
-              <Skeleton className="h-32 w-full" />
-            </CardContent>
-          </Card>
+          <div className="mobile-card">
+            <Skeleton className="h-6 w-32 mb-2" />
+            <Skeleton className="h-4 w-24 mb-4" />
+            <Skeleton className="h-8 w-20 mb-4" />
+            <Skeleton className="h-32 w-full" />
+          </div>
         </div>
       </div>
     );
@@ -110,11 +108,13 @@ export default function BillDetail() {
 
   if (!bill) {
     return (
-      <div className="max-w-md mx-auto bg-white min-h-screen p-4">
-        <div className="text-center py-12">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Bill Not Found</h2>
-          <p className="text-gray-600 mb-4">The bill you're looking for doesn't exist.</p>
-          <Button onClick={() => setLocation('/')}>Go Home</Button>
+      <div className="mobile-container">
+        <div className="mobile-content">
+          <div className="text-center py-12">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Bill Not Found</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">The bill you're looking for doesn't exist.</p>
+            <Button onClick={() => setLocation('/')} className="mobile-button-primary">Go Home</Button>
+          </div>
         </div>
       </div>
     );
@@ -126,17 +126,17 @@ export default function BillDetail() {
   const shareUrl = `${window.location.origin}/bill/${billId}`;
 
   return (
-    <div className="max-w-md mx-auto bg-white min-h-screen">
+    <div className="mobile-container">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-100">
-        <div className="px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Receipt className="text-white text-sm" />
+      <header className="mobile-header">
+        <div className="px-6 py-6 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/90 rounded-3xl flex items-center justify-center neon-glow">
+              <Receipt className="text-white text-lg" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-text-primary">{bill?.merchantName}</h1>
-              <p className="text-xs text-gray-500">{formatDate(bill?.billDate)}</p>
+              <h1 className="text-xl font-bold neon-text">{bill?.merchantName}</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{formatDate(bill?.billDate)}</p>
             </div>
           </div>
           <Badge variant={bill?.status === 'completed' ? 'default' : 'secondary'} className="capitalize">

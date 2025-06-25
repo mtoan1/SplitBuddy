@@ -192,33 +192,38 @@ export default function CreateBill() {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white min-h-screen">
-      <div className="p-4 space-y-6">
-        {/* Header */}
-        <div className="flex items-center mb-6">
-          <Button variant="ghost" size="icon" onClick={() => setLocation('/')}>
-            <ArrowLeft className="h-4 w-4" />
+    <div className="mobile-container">
+      {/* Header */}
+      <header className="mobile-header">
+        <div className="px-6 py-6 flex items-center">
+          <Button variant="ghost" size="icon" onClick={() => setLocation('/')} className="rounded-full hover:bg-primary/10">
+            <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-semibold text-text-primary ml-4">Create New Bill</h1>
+          <h1 className="text-xl font-bold ml-4 neon-text">Create New Bill</h1>
         </div>
+      </header>
+
+      <div className="mobile-content">
 
         {/* Bill Form */}
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center text-text-primary">
-                <Receipt className="w-5 h-5 mr-2" />
-                Bill Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <div className="mobile-card space-y-6">
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-primary/15 to-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 neon-glow">
+                <Receipt className="h-10 w-10 text-primary" />
+              </div>
+              <h2 className="text-xl font-bold neon-text">Bill Details</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Enter the basic information</p>
+            </div>
+            <div className="space-y-5">
               <div>
-                <Label htmlFor="merchantName">Restaurant/Merchant</Label>
+                <Label htmlFor="merchantName" className="text-sm font-bold text-gray-700 dark:text-gray-300">Business Name</Label>
                 <Input
                   id="merchantName"
-                  placeholder="e.g., Olive Garden"
+                  placeholder="Enter business name"
                   {...form.register('merchantName')}
+                  className="mobile-input"
                 />
                 {form.formState.errors.merchantName && (
                   <p className="text-sm text-red-500 mt-1">
@@ -228,13 +233,14 @@ export default function CreateBill() {
               </div>
 
               <div>
-                <Label htmlFor="totalAmount">Total Amount ($)</Label>
+                <Label htmlFor="totalAmount" className="text-sm font-bold text-gray-700 dark:text-gray-300">Total Amount</Label>
                 <Input
                   id="totalAmount"
                   type="number"
                   step="0.01"
                   placeholder="0.00"
                   {...form.register('totalAmount')}
+                  className="mobile-input text-2xl font-bold text-primary"
                 />
                 {form.formState.errors.totalAmount && (
                   <p className="text-sm text-red-500 mt-1">

@@ -66,6 +66,47 @@
   }
 }
 
+@layer components {
+  .mobile-container {
+    @apply max-w-md mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen relative;
+  }
+  
+  .mobile-header {
+    @apply sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:supports-[backdrop-filter]:bg-gray-900/60 border-b border-gray-200 dark:border-gray-800;
+  }
+  
+  .mobile-content {
+    @apply px-6 py-8 pb-24 space-y-8;
+  }
+  
+  .mobile-card {
+    @apply bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 p-6;
+  }
+  
+  .mobile-button-primary {
+    @apply w-full bg-primary text-white font-bold py-4 px-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 border-0;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.9));
+  }
+  
+  .mobile-button-secondary {
+    @apply w-full bg-white dark:bg-card border-2 border-primary/20 dark:border-primary/30 text-gray-900 dark:text-gray-100 font-semibold py-4 px-6 rounded-3xl shadow-lg hover:shadow-xl transition-all hover:scale-105 hover:border-primary/40;
+  }
+  
+  .mobile-input {
+    @apply w-full px-5 py-4 text-base bg-gray-50 dark:bg-input border-2 border-gray-200 dark:border-border rounded-2xl focus:ring-2 focus:ring-primary focus:border-primary transition-colors;
+  }
+  
+  .neon-glow {
+    @apply shadow-[0_0_20px_rgba(255,55,165,0.3)] dark:shadow-[0_0_30px_rgba(255,55,165,0.4)];
+  }
+  
+  .neon-text {
+    @apply bg-clip-text text-transparent;
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.8));
+    -webkit-background-clip: text;
+  }
+}
+
 @layer utilities {
   .text-text-primary {
     color: var(--text-primary);

@@ -24,7 +24,7 @@ export default function Homepage() {
       <header className="mobile-header">
         <div className="px-6 py-6 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-primary via-primary to-neon-purple rounded-3xl flex items-center justify-center neon-glow">
+            <div className="w-14 h-14 bg-gradient-to-br from-primary to-primary/90 rounded-3xl flex items-center justify-center neon-glow">
               <Receipt className="text-white text-xl" />
             </div>
             <div>
@@ -144,7 +144,7 @@ export default function Homepage() {
                     onClick={() => setLocation(`/bill/${bill.id}`)}
                   >
                     <div className="flex items-center space-x-5">
-                      <div className="w-16 h-16 bg-gradient-to-br from-primary/15 to-neon-purple/15 rounded-3xl flex items-center justify-center group-hover:from-primary/25 group-hover:to-neon-purple/25 transition-colors">
+                      <div className="w-16 h-16 bg-gradient-to-br from-primary/15 to-primary/10 rounded-3xl flex items-center justify-center group-hover:from-primary/25 group-hover:to-primary/20 transition-colors">
                         <Receipt className="h-8 w-8 text-primary" />
                       </div>
                       <div>
