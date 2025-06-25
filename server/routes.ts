@@ -218,6 +218,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mark participant as paid (mock payment)
+  app.post("/api/chillbill/participants/:participantId/mark-paid", async (req, res) => {
+    try {
+      const { participantId } = req.params;
+      const { paymentMethod = 'mock' } = req.body;
+      
+      const participant = await storage.markParticipantAsPaid(participantId, paymentMethod);
+      
+      if (!participant) {
+        return res.status(404).json({ message: "Participant not found" });
+      }
+
+      res.json({
+        message: "Payment recorded successfully",
+        participant,
+        transactionId: participant.transactionId
+      });
+    } catch (error) {
+      console.error("Error marking participant as paid:", error);
+      res.status(500).json({ message: "Failed to record payment" });
+    }
+  });
+
+  // Get payment status for a bill
+  app.get("/api/chillbill/bills/:billId/payment-status", async (req, res) => {
+    try {
+      const { billId } = req.params;
+      const participants = await storage.getParticipantsByBillId(billId);
+      
+      const paidParticipants = participants.filter(p => p.paymentStatus === 'paid');
+      const totalAmount = participants.reduce((sum, p) => sum + parseFloat(p.amountToPay), 0);
+      const paidAmount = paidParticipants.reduce((sum, p) => sum + parseFloat(p.amountToPay), 0);
+      const paidPercentage = totalAmount > 0 ? Math.round((paidAmount / totalAmount) * 100) : 0;
+
+      res.json({
+        totalParticipants: participants.length,
+        paidParticipants: paidParticipants.length,
+        pendingParticipants: participants.length - paidParticipants.length,
+        totalAmount,
+        paidAmount,
+        remainingAmount: totalAmount - paidAmount,
+        paidPercentage,
+        participants: participants.map(p => ({
+          id: p.id,
+          name: p.name,
+          amountToPay: p.amountToPay,
+          paymentStatus: p.paymentStatus,
+          paidAt: p.paidAt,
+          paymentMethod: p.paymentMethod,
+          transactionId: p.transactionId
+        }))
+      });
+    } catch (error) {
+      console.error("Error getting payment status:", error);
+      res.status(500).json({ message: "Failed to get payment status" });
+    }
+  });
+
   // QR Code generation
   app.get("/api/chillbill/bills/:billId/qr-code", async (req, res) => {
     try {

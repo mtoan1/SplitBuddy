@@ -1,14 +1,54 @@
 import { useParams, useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, Download, Share2 } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { CheckCircle, Home, Receipt, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default function PaymentSuccess() {
-  const { billId } = useParams();
+  const { billId, participantId } = useParams<{ billId: string; participantId: string }>();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  // Get transaction ID from URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const transactionId = urlParams.get('txn');
+
+  // Fetch participant details
+  const participantQuery = useQuery({
+    queryKey: ['/api/chillbill/participants', participantId],
+    enabled: !!participantId,
+  });
+
+  // Fetch bill details
+  const billQuery = useQuery({
+    queryKey: ['/api/chillbill/bills', billId],
+    enabled: !!billId,
+  });
+
+  const participant = participantQuery.data;
+  const bill = billQuery.data;
+
+  const copyTransactionId = async () => {
+    if (transactionId) {
+      try {
+        await navigator.clipboard.writeText(transactionId);
+        toast({
+          title: "Copied!",
+          description: "Transaction ID copied to clipboard",
+        });
+      } catch (err) {
+        toast({
+          title: "Copy Failed",
+          description: "Unable to copy transaction ID",
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   // Mock transaction data - in real app this would come from the payment processing
   const transactionData = {
