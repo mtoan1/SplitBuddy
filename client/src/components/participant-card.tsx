@@ -76,18 +76,21 @@ export default function ParticipantCard({
   return (
     <div
       className={cn(
-        "flex items-center justify-between p-3 rounded-lg border transition-all",
+        "flex items-center justify-between p-4 rounded-xl border transition-all duration-200",
         config.bgColor,
-        selectable && "hover:border-primary hover:bg-primary hover:bg-opacity-5 cursor-pointer"
+        selectable && "hover:border-primary hover:shadow-lg hover:shadow-primary/20 cursor-pointer"
       )}
       onClick={onClick}
     >
       <div className="flex items-center space-x-3">
-        <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", config.avatarColor)}>
-          <span className="text-white font-medium text-sm">{initials}</span>
+        <div className={cn(
+          "w-10 h-10 rounded-full flex items-center justify-center border border-white/30 shadow-sm",
+          config.avatarColor
+        )}>
+          <span className="text-white font-bold text-sm">{initials}</span>
         </div>
         <div>
-          <p className="font-medium text-text-primary">{name}</p>
+          <p className="font-semibold text-gray-900 dark:text-white">{name}</p>
           {phone && <p className="text-xs text-gray-500">{phone}</p>}
         </div>
       </div>
@@ -111,7 +114,7 @@ export default function ParticipantCard({
               e.stopPropagation();
               onPayClick(participant.id);
             }}
-            className="bg-primary hover:bg-primary/90 text-white"
+            className="bg-gradient-to-r from-primary to-primary/80 text-white hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-primary/30 border-0"
           >
             <CreditCard className="w-3 h-3 mr-1" />
             Pay

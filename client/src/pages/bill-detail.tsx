@@ -58,6 +58,16 @@ export default function BillDetail() {
     setLocation(`/payment/${billId}/${participantId}`);
   };
 
+  // Sort participants: bill owner first, then alphabetical by name
+  const sortedParticipants = participants?.slice().sort((a, b) => {
+    // If one is the bill owner and the other isn't, bill owner comes first
+    if (a.name === bill?.createdBy && b.name !== bill?.createdBy) return -1;
+    if (b.name === bill?.createdBy && a.name !== bill?.createdBy) return 1;
+    
+    // Otherwise, sort alphabetically by name
+    return a.name.localeCompare(b.name);
+  });
+
   const handleShare = async () => {
     const shareUrl = `${window.location.origin}/bill/${billId}`;
     
