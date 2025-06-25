@@ -109,6 +109,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get individual participant
+  app.get("/api/chillbill/participants/:participantId", async (req, res) => {
+    try {
+      const { participantId } = req.params;
+      const participantList = await db.select().from(participants).where(eq(participants.id, participantId));
+      
+      if (participantList.length === 0) {
+        return res.status(404).json({ message: "Participant not found" });
+      }
+      
+      res.json(participantList[0]);
+    } catch (error) {
+      console.error("Error fetching participant:", error);
+      res.status(500).json({ message: "Failed to fetch participant", error });
+    }
+  });
+
   app.post("/api/chillbill/bills/:billId/participants", async (req, res) => {
     try {
       const participantData = insertParticipantSchema.parse({

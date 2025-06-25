@@ -4,8 +4,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { CheckCircle, Clock, CreditCard, Smartphone, Banknote, ArrowLeft } from "lucide-react";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { CheckCircle, Clock, CreditCard, ArrowLeft } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
@@ -15,17 +24,19 @@ export default function PaymentFlow() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Fetch participant details
   const participantQuery = useQuery({
     queryKey: ['/api/chillbill/participants', participantId],
+    queryFn: () => apiRequest('GET', `/api/chillbill/participants/${participantId}`),
     enabled: !!participantId,
   });
 
   // Fetch bill details
   const billQuery = useQuery({
     queryKey: ['/api/chillbill/bills', billId],
+    queryFn: () => apiRequest('GET', `/api/chillbill/bills/${billId}`),
     enabled: !!billId,
   });
 
@@ -34,9 +45,9 @@ export default function PaymentFlow() {
 
   // Mock payment mutation
   const paymentMutation = useMutation({
-    mutationFn: async (paymentMethod: string) => {
+    mutationFn: async () => {
       return apiRequest('POST', `/api/chillbill/participants/${participantId}/mark-paid`, {
-        paymentMethod
+        paymentMethod: 'mock_payment'
       });
     },
     onSuccess: (data) => {
@@ -48,6 +59,7 @@ export default function PaymentFlow() {
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: ['/api/chillbill/bills', billId] });
       queryClient.invalidateQueries({ queryKey: ['/api/chillbill/bills', billId, 'payment-status'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/chillbill/bills', billId, 'participants'] });
       
       // Redirect to success page
       setLocation(`/payment-success/${billId}/${participantId}?txn=${data.transactionId}`);
@@ -61,16 +73,13 @@ export default function PaymentFlow() {
     },
   });
 
-  const handlePayment = () => {
-    if (!selectedPaymentMethod) {
-      toast({
-        title: "Select Payment Method",
-        description: "Please choose how you'd like to pay.",
-        variant: "destructive",
-      });
-      return;
-    }
-    paymentMutation.mutate(selectedPaymentMethod);
+  const handlePayClick = () => {
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmPayment = () => {
+    setShowConfirmDialog(false);
+    paymentMutation.mutate();
   };
 
   if (participantQuery.isLoading || billQuery.isLoading) {
@@ -116,134 +125,110 @@ export default function PaymentFlow() {
     );
   }
 
-  const paymentMethods = [
-    { id: 'credit_card', name: 'Credit Card', icon: CreditCard, description: 'Visa, Mastercard, Amex' },
-    { id: 'mobile_wallet', name: 'Mobile Wallet', icon: Smartphone, description: 'Apple Pay, Google Pay' },
-    { id: 'bank_transfer', name: 'Bank Transfer', icon: Banknote, description: 'Direct bank transfer' },
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10">
-      <div className="mobile-container">
-        <header className="mobile-header">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setLocation(`/bill/${billId}`)}
-            className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Bill
-          </Button>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Payment</h1>
-          <div className="w-16"></div>
-        </header>
+    <>
+      <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10">
+        <div className="mobile-container">
+          <header className="mobile-header">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setLocation(`/bill/${billId}`)}
+              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Bill
+            </Button>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Payment</h1>
+            <div className="w-16"></div>
+          </header>
 
-        <div className="mobile-content">
-          {/* Payment Summary */}
-          <Card className="mobile-card">
-            <CardHeader>
-              <CardTitle className="text-center">Payment Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-primary">
-                  {formatCurrency(parseFloat(participant.amountToPay))}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Your share</p>
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Bill</span>
-                  <span className="font-medium">{bill.name}</span>
+          <div className="mobile-content">
+            {/* Payment Summary */}
+            <Card className="mobile-card">
+              <CardHeader>
+                <CardTitle className="text-center">Payment Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-primary">
+                    {formatCurrency(parseFloat(participant?.amountToPay || '0'))}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Your share</p>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Participant</span>
-                  <span className="font-medium">{participant.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Status</span>
-                  <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-                    <Clock className="w-3 h-3 mr-1" />
-                    Pending
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Payment Methods */}
-          <Card className="mobile-card">
-            <CardHeader>
-              <CardTitle>Choose Payment Method</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {paymentMethods.map((method) => (
-                <div
-                  key={method.id}
-                  className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                    selectedPaymentMethod === method.id
-                      ? 'border-primary bg-primary/5'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
-                  onClick={() => setSelectedPaymentMethod(method.id)}
-                >
-                  <div className="flex items-center space-x-3">
-                    <method.icon className={`w-6 h-6 ${
-                      selectedPaymentMethod === method.id ? 'text-primary' : 'text-gray-400'
-                    }`} />
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900 dark:text-white">
-                        {method.name}
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {method.description}
-                      </p>
-                    </div>
-                    <div className={`w-4 h-4 rounded-full border-2 ${
-                      selectedPaymentMethod === method.id
-                        ? 'border-primary bg-primary'
-                        : 'border-gray-300 dark:border-gray-600'
-                    }`}>
-                      {selectedPaymentMethod === method.id && (
-                        <div className="w-full h-full rounded-full bg-white transform scale-50"></div>
-                      )}
-                    </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Bill</span>
+                    <span className="font-medium">{bill?.name || 'Loading...'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Participant</span>
+                    <span className="font-medium">{participant?.name || 'Loading...'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Status</span>
+                    <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                      <Clock className="w-3 h-3 mr-1" />
+                      Pending
+                    </Badge>
                   </div>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Payment Button */}
-          <Card className="mobile-card">
-            <CardContent className="p-4">
-              <Button 
-                onClick={handlePayment}
-                disabled={!selectedPaymentMethod || paymentMutation.isPending}
-                className="w-full bg-primary hover:bg-primary/90 text-white py-3"
-                size="lg"
-              >
-                {paymentMutation.isPending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Processing...
-                  </>
-                ) : (
-                  `Pay ${formatCurrency(parseFloat(participant.amountToPay))}`
-                )}
-              </Button>
-              
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
-                This is a demo payment flow. No actual payment will be processed.
-              </p>
-            </CardContent>
-          </Card>
+            {/* Payment Button */}
+            <Card className="mobile-card">
+              <CardContent className="p-4">
+                <Button 
+                  onClick={handlePayClick}
+                  disabled={paymentMutation.isPending || !participant}
+                  className="w-full bg-primary hover:bg-primary/90 text-white py-3"
+                  size="lg"
+                >
+                  {paymentMutation.isPending ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Pay {formatCurrency(parseFloat(participant?.amountToPay || '0'))}
+                    </>
+                  )}
+                </Button>
+                
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+                  This is a demo payment flow. No actual payment will be processed.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Payment Confirmation Dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Payment</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to pay {formatCurrency(parseFloat(participant?.amountToPay || '0'))} for {bill?.name}?
+              This is a demo payment and will mark your payment as completed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmPayment}
+              className="bg-primary hover:bg-primary/90"
+            >
+              Yes, Pay Now
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
