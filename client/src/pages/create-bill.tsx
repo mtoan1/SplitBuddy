@@ -161,7 +161,7 @@ export default function CreateBill() {
         billId,
         name: mockNames[i % mockNames.length],
         phone: mockPhones[i % mockPhones.length],
-        amountToPay: Number(amountToPay.toFixed(2)),
+        amountToPay: amountToPay.toFixed(2).toString(),
         paymentStatus: isOwner ? 'paid' : 'pending'
       };
       
