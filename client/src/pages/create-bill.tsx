@@ -249,9 +249,68 @@ export default function CreateBill() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="participantCount">Number of People</Label>
+              <div>
+                <Label htmlFor="billDate" className="text-sm font-bold text-gray-700 dark:text-gray-300">Bill Date</Label>
+                <Input
+                  id="billDate"
+                  type="date"
+                  {...form.register('billDate')}
+                  className="mobile-input"
+                />
+                {form.formState.errors.billDate && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {form.formState.errors.billDate.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="participantCount" className="text-sm font-bold text-gray-700 dark:text-gray-300">Number of People</Label>
+                <Input
+                  id="participantCount"
+                  type="number"
+                  min="2"
+                  max="20"
+                  placeholder="2"
+                  {...form.register('participantCount', { valueAsNumber: true })}
+                  className="mobile-input text-xl font-bold text-primary"
+                />
+                {form.formState.errors.participantCount && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {form.formState.errors.participantCount.message}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <Button 
+            type="submit" 
+            className="mobile-button-primary neon-glow"
+            disabled={createBillMutation.isPending}
+          >
+            {createBillMutation.isPending ? (
+              <div className="flex items-center space-x-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                <span className="font-bold">Creating Bill...</span>
+              </div>
+            ) : (
+              <span className="font-bold">Continue to Participants</span>
+            )}
+          </Button>
+        </form>
+      </div>
+
+      {showAIProcessing && createdBillId && (
+        <AIProcessingModal
+          isOpen={showAIProcessing}
+          billId={createdBillId}
+          onComplete={handleAIProcessingComplete}
+        />
+      )}
+    </div>
+  );
+}
                   <Input
                     id="participantCount"
                     type="number"
