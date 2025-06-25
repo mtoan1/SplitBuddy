@@ -204,6 +204,7 @@ export default function BillDetail() {
                 <Button 
                   variant="outline" 
                   size="sm"
+                  className="border-primary text-primary hover:bg-primary/10"
                   onClick={() => navigator.clipboard.writeText(shareUrl)}
                 >
                   <Copy className="w-4 h-4" />

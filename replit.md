@@ -102,6 +102,7 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 25, 2025: Updated bill detail screen buttons to use primary pink color scheme instead of blue
 - June 25, 2025: Updated "My Bills" button with Receipt icon and matching primary color scheme
 - June 25, 2025: Sorted bill lists by creation date (newest first) on homepage and bills dashboard
 - June 25, 2025: Added Cake banner image to bottom of homepage with responsive design
