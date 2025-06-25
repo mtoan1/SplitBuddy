@@ -310,8 +310,6 @@ export default function CreateBill() {
       )}
     </div>
   );
-}
-                  <Input
                     id="participantCount"
                     type="number"
                     min="2"
