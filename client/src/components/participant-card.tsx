@@ -38,17 +38,25 @@ export default function ParticipantCard({
       case 'paid':
         return {
           bgColor: 'bg-green-50 border-green-100',
-          avatarColor: 'bg-success',
-          textColor: 'text-success',
-          icon: Check,
+          avatarColor: 'bg-green-500',
+          textColor: 'text-green-600',
+          icon: CheckCircle,
           label: 'Paid'
+        };
+      case 'failed':
+        return {
+          bgColor: 'bg-red-50 border-red-100',
+          avatarColor: 'bg-red-500',
+          textColor: 'text-red-600',
+          icon: XCircle,
+          label: 'Failed'
         };
       case 'overdue':
         return {
           bgColor: 'bg-red-50 border-red-100',
-          avatarColor: 'bg-secondary',
-          textColor: 'text-secondary',
-          icon: AlertCircle,
+          avatarColor: 'bg-red-500',
+          textColor: 'text-red-600',
+          icon: AlertTriangle,
           label: 'Overdue'
         };
       default:

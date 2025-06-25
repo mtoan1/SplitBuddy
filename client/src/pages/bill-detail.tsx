@@ -249,6 +249,8 @@ export default function BillDetail() {
                   <ParticipantCard
                     key={participant.id}
                     participant={participant}
+                    showPayButton={true}
+                    onPayClick={handlePayClick}
                   />
                 ))
               )}

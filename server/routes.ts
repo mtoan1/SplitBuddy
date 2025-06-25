@@ -248,8 +248,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const participants = await storage.getParticipantsByBillId(billId);
       
       const paidParticipants = participants.filter(p => p.paymentStatus === 'paid');
-      const totalAmount = participants.reduce((sum, p) => sum + parseFloat(p.amountToPay), 0);
-      const paidAmount = paidParticipants.reduce((sum, p) => sum + parseFloat(p.amountToPay), 0);
+      const totalAmount = participants.reduce((sum, p) => sum + parseFloat(p.amountToPay || '0'), 0);
+      const paidAmount = paidParticipants.reduce((sum, p) => sum + parseFloat(p.amountToPay || '0'), 0);
       const paidPercentage = totalAmount > 0 ? Math.round((paidAmount / totalAmount) * 100) : 0;
 
       res.json({
