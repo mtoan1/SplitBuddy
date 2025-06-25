@@ -12,8 +12,8 @@ import { formatCurrency, formatDate, calculatePaidPercentage, calculateTotalPaid
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
-// Mock bill ID for demonstration
-const MOCK_BILL_ID = "demo-bill-1";
+// Get the actual bill ID from the database
+const DEMO_BILL_ID = "6f02356a-1b22-4816-819e-1ace154d169f";
 
 export default function BillDashboard() {
   const { toast } = useToast();
@@ -23,33 +23,26 @@ export default function BillDashboard() {
   useEffect(() => {
     const initializeDemoData = async () => {
       try {
-        // Check if demo bill exists
-        const response = await fetch(`/api/chillbill/bills/${MOCK_BILL_ID}`);
+        // Check if demo participants exist, if not create them
+        const participantsResponse = await fetch(`/api/chillbill/bills/${DEMO_BILL_ID}/participants`);
         
-        if (!response.ok) {
-          // Create demo bill
-          const newBill = await apiRequest('POST', '/api/chillbill/bills', {
-            creatorId: 'demo-user',
-            totalAmount: '124.50',
-            merchantName: 'Olive Garden',
-            billDate: new Date().toISOString()
-          });
+        if (participantsResponse.ok) {
+          const existingParticipants = await participantsResponse.json();
+          
+          if (existingParticipants.length === 0) {
+            // Add demo participants
+            const participants = [
+              { name: 'Alice Smith', phone: '+1 (555) 123-4567', amountToPay: '31.13', paymentStatus: 'paid' },
+              { name: 'Bob Johnson', phone: '+1 (555) 987-6543', amountToPay: '43.57', paymentStatus: 'paid' },
+              { name: 'Carol Williams', phone: '+1 (555) 456-7890', amountToPay: '25.40', paymentStatus: 'pending' },
+              { name: 'David Miller', phone: '+1 (555) 321-0987', amountToPay: '24.40', paymentStatus: 'overdue' },
+            ];
 
-          // Update the bill ID to use the created bill's ID
-          const billId = newBill.id || MOCK_BILL_ID;
-
-          // Add demo participants
-          const participants = [
-            { name: 'Alice Smith', phone: '+1 (555) 123-4567', amountToPay: '31.13', paymentStatus: 'paid' },
-            { name: 'Bob Johnson', phone: '+1 (555) 987-6543', amountToPay: '43.57', paymentStatus: 'paid' },
-            { name: 'Carol Williams', phone: '+1 (555) 456-7890', amountToPay: '25.40', paymentStatus: 'pending' },
-            { name: 'David Miller', phone: '+1 (555) 321-0987', amountToPay: '24.40', paymentStatus: 'overdue' },
-          ];
-
-          for (const participant of participants) {
-            await apiRequest('POST', `/api/chillbill/bills/${billId}/participants`, {
-              ...participant
-            });
+            for (const participant of participants) {
+              await apiRequest('POST', `/api/chillbill/bills/${DEMO_BILL_ID}/participants`, {
+                ...participant
+              });
+            }
           }
         }
       } catch (error) {
@@ -61,25 +54,25 @@ export default function BillDashboard() {
   }, []);
 
   const { data: bill, isLoading: billLoading } = useQuery({
-    queryKey: ['/api/chillbill/bills', MOCK_BILL_ID],
+    queryKey: ['/api/chillbill/bills', DEMO_BILL_ID],
     queryFn: async () => {
-      const response = await fetch(`/api/chillbill/bills/${MOCK_BILL_ID}`);
+      const response = await fetch(`/api/chillbill/bills/${DEMO_BILL_ID}`);
       if (!response.ok) throw new Error('Failed to fetch bill');
       return response.json();
     }
   });
 
   const { data: participants = [], isLoading: participantsLoading } = useQuery({
-    queryKey: ['/api/chillbill/bills', MOCK_BILL_ID, 'participants'],
+    queryKey: ['/api/chillbill/bills', DEMO_BILL_ID, 'participants'],
     queryFn: async () => {
-      const response = await fetch(`/api/chillbill/bills/${MOCK_BILL_ID}/participants`);
+      const response = await fetch(`/api/chillbill/bills/${DEMO_BILL_ID}/participants`);
       if (!response.ok) throw new Error('Failed to fetch participants');
       return response.json();
     }
   });
 
   const sendRemindersMutation = useMutation({
-    mutationFn: () => apiRequest('POST', `/api/chillbill/bills/${MOCK_BILL_ID}/send-reminders`, {}),
+    mutationFn: () => apiRequest('POST', `/api/chillbill/bills/${DEMO_BILL_ID}/send-reminders`, {}),
     onSuccess: () => {
       toast({
         title: "Reminders Sent",
@@ -174,7 +167,7 @@ export default function BillDashboard() {
             </div>
 
             {/* QR Code Section */}
-            <QRCodeDisplay billId={MOCK_BILL_ID} />
+            <QRCodeDisplay billId={DEMO_BILL_ID} />
           </CardContent>
         </Card>
 

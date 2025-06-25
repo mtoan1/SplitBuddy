@@ -5,6 +5,45 @@ import { z } from "zod";
 import { insertBillSchema, insertParticipantSchema } from "@shared/schema";
 import QRCode from "qrcode";
 
+// Helper function to generate random menu items
+function generateRandomItems(totalAmount: number) {
+  const items = [
+    { name: "Appetizer", priceRange: [8, 15] },
+    { name: "Main Course", priceRange: [15, 28] },
+    { name: "Side Dish", priceRange: [5, 12] },
+    { name: "Dessert", priceRange: [6, 10] },
+    { name: "Drinks", priceRange: [3, 8] },
+    { name: "Salad", priceRange: [9, 16] },
+    { name: "Soup", priceRange: [6, 12] }
+  ];
+  
+  const generatedItems = [];
+  let remainingAmount = totalAmount;
+  const itemCount = Math.floor(Math.random() * 4) + 2; // 2-5 items
+  
+  for (let i = 0; i < itemCount - 1; i++) {
+    const item = items[Math.floor(Math.random() * items.length)];
+    const [min, max] = item.priceRange;
+    const price = Math.random() * (max - min) + min;
+    const actualPrice = Math.min(price, remainingAmount * 0.8); // Don't use more than 80% of remaining
+    
+    generatedItems.push({
+      name: item.name,
+      price: parseFloat(actualPrice.toFixed(2))
+    });
+    
+    remainingAmount -= actualPrice;
+  }
+  
+  // Add final item with remaining amount (tax, tip, etc.)
+  generatedItems.push({
+    name: "Tax & Service",
+    price: parseFloat(remainingAmount.toFixed(2))
+  });
+  
+  return generatedItems;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Bill Management
   app.post("/api/chillbill/bills", async (req, res) => {
@@ -230,18 +269,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Image Processing Endpoints
   app.post("/api/chillbill/bills/:billId/bill-image", async (req, res) => {
     try {
-      // Mock AI service for bill processing
+      // Mock AI service for bill processing with random data
+      const restaurants = ["Olive Garden", "McDonald's", "Pizza Hut", "Subway", "KFC", "Starbucks", "Burger King", "Taco Bell", "Chipotle", "Panera Bread"];
+      const randomAmount = (Math.random() * 180 + 20).toFixed(2); // Random amount between $20-$200
+      const randomRestaurant = restaurants[Math.floor(Math.random() * restaurants.length)];
+      
       const mockBillData = {
-        totalAmount: 124.50,
-        merchantName: "Olive Garden",
+        totalAmount: parseFloat(randomAmount),
+        merchantName: randomRestaurant,
         billDate: new Date().toISOString(),
-        items: [
-          { name: "Chicken Alfredo", price: 18.99 },
-          { name: "Caesar Salad", price: 12.50 },
-          { name: "Breadsticks", price: 6.99 },
-          { name: "Drinks", price: 24.95 },
-          { name: "Tax & Tip", price: 20.07 }
-        ]
+        items: generateRandomItems(parseFloat(randomAmount))
       };
 
       // Update bill with extracted data
@@ -264,13 +301,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/chillbill/bills/:billId/group-image", async (req, res) => {
     try {
-      // Mock AI service for face recognition
-      const mockParticipants = [
-        { name: "Alice Smith", confidence: 0.95, faceId: "face_001" },
-        { name: "Bob Johnson", confidence: 0.92, faceId: "face_002" },
-        { name: "Carol Williams", confidence: 0.88, faceId: "face_003" },
-        { name: "David Miller", confidence: 0.91, faceId: "face_004" }
-      ];
+      // Mock AI service for face recognition with random participants
+      const firstNames = ["Alice", "Bob", "Carol", "David", "Emma", "Frank", "Grace", "Henry", "Ivy", "Jack", "Kate", "Liam"];
+      const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez"];
+      
+      const participantCount = Math.floor(Math.random() * 10) + 3; // Random between 3-12 people
+      const mockParticipants = [];
+      
+      for (let i = 0; i < participantCount; i++) {
+        const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+        mockParticipants.push({
+          name: `${firstName} ${lastName}`,
+          confidence: (Math.random() * 0.2 + 0.8).toFixed(2), // Random confidence 0.8-1.0
+          faceId: `face_${String(i + 1).padStart(3, '0')}`
+        });
+      }
 
       // Add participants to bill
       for (const participant of mockParticipants) {
