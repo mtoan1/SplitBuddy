@@ -102,6 +102,7 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 25, 2025: Updated to modern flat design style - removed drop shadows, using clean borders and subtle hover effects
 - June 25, 2025: Restored bill image and group photo upload sections to create-bill page with modern styling
 - June 25, 2025: Added home navigation shortcuts to bill screens with consistent neon pink/deep blue styling
 - June 25, 2025: Updated secondary color to deep blue (#271d7a) to match requested color scheme

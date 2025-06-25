@@ -139,7 +139,7 @@ export default function Homepage() {
               </div>
             ) : (
               recentBills.map((bill: any) => (
-                <div key={bill.id} className="mobile-card cursor-pointer hover:shadow-2xl transition-all hover:scale-[1.02] group">
+                <div key={bill.id} className="mobile-card cursor-pointer transition-all hover:scale-[1.02] hover:border-primary/20 group">
                   <div 
                     className="flex items-center justify-between"
                     onClick={() => setLocation(`/bill/${bill.id}`)}

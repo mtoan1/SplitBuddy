@@ -156,7 +156,7 @@ export default function BillDetail() {
 
       <div className="mobile-content">
         {/* Bill Summary Card */}
-        <Card>
+        <Card className="mobile-card">
           <CardContent className="p-4">
             <div className="text-center mb-4">
               <p className="text-3xl font-bold text-text-primary">{formatCurrency(totalAmount)}</p>

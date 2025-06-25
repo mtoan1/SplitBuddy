@@ -80,16 +80,16 @@
   }
   
   .mobile-card {
-    @apply bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 p-6;
+    @apply bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 p-6;
   }
   
   .mobile-button-primary {
-    @apply w-full bg-primary text-white font-bold py-4 px-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all hover:scale-105 border-0;
+    @apply w-full bg-primary text-white font-bold py-4 px-6 rounded-3xl transition-all hover:scale-105 border-0;
     background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.9));
   }
   
   .mobile-button-secondary {
-    @apply w-full bg-white dark:bg-card border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 font-semibold py-4 px-6 rounded-3xl shadow-lg hover:shadow-xl transition-all hover:scale-105;
+    @apply w-full bg-white dark:bg-card border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 font-semibold py-4 px-6 rounded-3xl transition-all hover:scale-105;
   }
   
   .mobile-button-secondary:hover {
@@ -105,7 +105,12 @@
   }
   
   .neon-glow {
-    @apply shadow-[0_0_20px_rgba(255,55,165,0.3)] dark:shadow-[0_0_30px_rgba(255,55,165,0.4)];
+    @apply border-2;
+    border-color: hsl(var(--primary) / 0.2);
+  }
+  
+  .dark .neon-glow {
+    border-color: hsl(var(--primary) / 0.3);
   }
   
   .neon-text {
