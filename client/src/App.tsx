@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
+import Homepage from "@/pages/homepage";
 import BillDashboard from "@/pages/bill-dashboard";
 import CreateBill from "@/pages/create-bill";
 import BillDetail from "@/pages/bill-detail";
@@ -15,13 +16,14 @@ import PaymentSuccess from "@/pages/payment-success";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={BillDashboard} />
-      <Route path="/create" component={CreateBill} />
+      <Route path="/" component={Homepage} />
+      <Route path="/bills" component={BillDashboard} />
+      <Route path="/create-bill" component={CreateBill} />
       <Route path="/bill/:id/participants" component={ManualParticipants} />
-      <Route path="/bill/:billId/detail" component={BillDetail} />
-      <Route path="/bill/:billId" component={ParticipantSelection} />
-      <Route path="/bill/:billId/pay/:participantId" component={PaymentScreen} />
-      <Route path="/bill/:billId/success" component={PaymentSuccess} />
+      <Route path="/bill/:id" component={BillDetail} />
+      <Route path="/participant-selection/:id" component={ParticipantSelection} />
+      <Route path="/payment/:billId/:participantId" component={PaymentScreen} />
+      <Route path="/payment-success/:billId" component={PaymentSuccess} />
       <Route component={NotFound} />
     </Switch>
   );
