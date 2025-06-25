@@ -124,7 +124,7 @@ export default function BillDashboard() {
   const totalPaid = calculateTotalPaid(participants);
 
   return (
-    <div className="max-w-md mx-auto bg-white min-h-screen">
+    <div className="mobile-container">
       {/* Header */}
       <header className="mobile-header">
         <div className="px-6 py-4 flex items-center justify-between">
@@ -152,9 +152,9 @@ export default function BillDashboard() {
         </div>
       </header>
 
-      <div className="p-4 space-y-6">
+      <div className="mobile-content">
         {/* Bill Info Card */}
-        <Card>
+        <Card className="mobile-card">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-4">
               <div>
