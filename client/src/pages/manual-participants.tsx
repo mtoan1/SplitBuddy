@@ -34,11 +34,13 @@ export default function ManualParticipants() {
   // Query for existing participants
   const participantsQuery = useQuery({
     queryKey: ['/api/chillbill/bills', billId, 'participants'],
+    queryFn: () => apiRequest('GET', `/api/chillbill/bills/${billId}/participants`),
     enabled: !!billId,
   });
 
   const billQuery = useQuery({
     queryKey: ['/api/chillbill/bills', billId],
+    queryFn: () => apiRequest('GET', `/api/chillbill/bills/${billId}`),
     enabled: !!billId,
   });
 
