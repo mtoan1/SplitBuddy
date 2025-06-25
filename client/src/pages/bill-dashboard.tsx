@@ -27,7 +27,6 @@ export default function BillDashboard() {
         if (!response.ok) {
           // Create demo bill
           await apiRequest('POST', '/api/chillbill/bills', {
-            id: MOCK_BILL_ID,
             creatorId: 'demo-user',
             totalAmount: '124.50',
             merchantName: 'Olive Garden',

@@ -1,0 +1,41 @@
+1. Core Functionality
+Bill Split Request Management:  
+Create, retrieve, update, and cancel bill split requests.  
+Store and manage bill details (e.g., total amount, merchant name, date).
+Image Processing:  
+Accept bill and group images from the banking app.  
+Forward images to an AI service for processing (bill data extraction and face recognition).  
+Handle AI callbacks and update the database with results.
+Participant Management:  
+Manage participant lists (add, remove, update).  
+Identify banking users vs. non-banking users.  
+Track payment status per participant.
+Split Calculation:  
+Support multiple split methods: equal, custom amount, percentage.  
+Calculate amounts owed by each participant.
+Payment Management:  
+Send payment requests to participants (in-app for banking users, links/QR codes for others).  
+Process payment updates via webhooks from banking’s payment system.  
+Allow manual marking of payments (e.g., offline payments).
+Notifications:  
+Send real-time notifications (e.g., payment requests, reminders, completion).  
+Support multiple channels: in-app (banking users), SMS, email (non-banking users).
+Status and Reporting:  
+Track bill split request statuses (e.g., created, active, completed).  
+Provide status history and basic reports (e.g., paid vs. unpaid amounts).
+2. Inputs and Outputs
+Inputs:  
+Bill image (for AI to extract total amount, merchant, date, etc.).  
+Group image (for AI to identify participants via face recognition).
+Outputs:  
+Split plan with amounts per participant.  
+Payment statuses for each participant.
+3. Integrations
+AI Service (Internal):  
+Send bill and group images for processing.  
+Receive callbacks with bill details and participant lists.  
+Note: For development, mock this service with dummy responses (e.g., hardcoded bill data and participant lists).
+banking Payment System:  
+Create payment requests and generate payment links/QR codes.  
+Receive webhook updates for payment statuses.  
+Note: Mock this system for testing (e.g., simulate payment creation and updates)

@@ -52,7 +52,7 @@ export const paymentRequests = pgTable("payment_requests", {
   expiryDate: timestamp("expiry_date"),
   status: paymentStatusEnum("status").default('pending'),
   paymentId: text("payment_id"),
-  retryCount: serial("retry_count").default(0),
+  retryCount: serial("retry_count"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
