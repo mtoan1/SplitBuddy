@@ -284,6 +284,87 @@ export default function CreateBill() {
             </div>
           </div>
 
+          {/* Image Upload Section */}
+          <div className="mobile-card">
+            <div className="flex items-center mb-6">
+              <Upload className="w-6 h-6 text-primary mr-3" />
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Smart Processing (Optional)</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Upload images for AI assistance or skip to create manually</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {/* Receipt Photo Upload */}
+              <div>
+                <Label htmlFor="billImage" className="text-sm font-bold text-gray-700 dark:text-gray-300">Receipt Photo</Label>
+                <div className="mt-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl p-6 text-center hover:border-primary transition-colors">
+                  <Receipt className="w-10 h-10 mx-auto text-gray-400 dark:text-gray-500 mb-3" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    Auto-extract bill details from receipt
+                  </p>
+                  <input
+                    id="billImage"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => setBillImage(e.target.files?.[0] || null)}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => document.getElementById('billImage')?.click()}
+                    className="rounded-full"
+                  >
+                    Choose Receipt
+                  </Button>
+                  {billImage && (
+                    <p className="text-sm text-primary font-medium mt-3">✓ {billImage.name}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Group Photo Upload */}
+              <div>
+                <Label htmlFor="groupImage" className="text-sm font-bold text-gray-700 dark:text-gray-300">Group Photo</Label>
+                <div className="mt-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl p-6 text-center hover:border-primary transition-colors">
+                  <Users className="w-10 h-10 mx-auto text-gray-400 dark:text-gray-500 mb-3" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    Auto-identify participants from group photo
+                  </p>
+                  <input
+                    id="groupImage"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => setGroupImage(e.target.files?.[0] || null)}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => document.getElementById('groupImage')?.click()}
+                    className="rounded-full"
+                  >
+                    Choose Photo
+                  </Button>
+                  {groupImage && (
+                    <p className="text-sm text-primary font-medium mt-3">✓ {groupImage.name}</p>
+                  )}
+                </div>
+              </div>
+              
+              {(billImage || groupImage) && (
+                <div className="bg-primary/10 dark:bg-primary/20 p-4 rounded-2xl border border-primary/20">
+                  <p className="text-sm text-primary font-medium">
+                    🤖 AI will process your {billImage ? 'receipt' : ''}{billImage && groupImage ? ' and ' : ''}{groupImage ? 'group photo' : ''} after creation
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
           <Button 
             type="submit" 
             className="mobile-button-primary neon-glow"
@@ -295,7 +376,7 @@ export default function CreateBill() {
                 <span className="font-bold">Creating Bill...</span>
               </div>
             ) : (
-              <span className="font-bold">Continue to Participants</span>
+              <span className="font-bold">{(billImage || groupImage) ? 'Create Bill & Process with AI' : 'Continue to Participants'}</span>
             )}
           </Button>
         </form>
