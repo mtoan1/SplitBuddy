@@ -1,0 +1,104 @@
+import { useParams, useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Check, Download, Share2 } from "lucide-react";
+import { formatCurrency } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+
+export default function PaymentSuccess() {
+  const { billId } = useParams();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  // Mock transaction data - in real app this would come from the payment processing
+  const transactionData = {
+    amount: 25.40,
+    transactionId: `TXN${Date.now()}`,
+    date: new Date().toLocaleString()
+  };
+
+  const handleDownloadReceipt = () => {
+    toast({
+      title: "Receipt Downloaded",
+      description: "Your payment receipt has been downloaded.",
+    });
+  };
+
+  const handleShareReceipt = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Payment Receipt',
+        text: `Payment of ${formatCurrency(transactionData.amount)} processed successfully`,
+        url: window.location.href
+      });
+    } else {
+      toast({
+        title: "Receipt Link Copied",
+        description: "Receipt link has been copied to clipboard.",
+      });
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto bg-white min-h-screen">
+      <div className="p-4 space-y-6 text-center">
+        <div className="py-8">
+          <div className="w-20 h-20 bg-success rounded-full flex items-center justify-center mx-auto mb-6">
+            <Check className="text-white text-2xl" />
+          </div>
+          <h2 className="text-2xl font-bold text-text-primary mb-3">Payment Successful!</h2>
+          <p className="text-gray-600 mb-6">Your payment has been processed successfully</p>
+          
+          {/* Payment Summary */}
+          <Card className="bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Amount Paid</span>
+                  <span className="text-text-primary font-semibold">
+                    {formatCurrency(transactionData.amount)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Transaction ID</span>
+                  <span className="text-text-primary font-mono text-sm">
+                    #{transactionData.transactionId}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Date</span>
+                  <span className="text-text-primary">{transactionData.date}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-3">
+            <Button 
+              className="w-full bg-primary text-white py-3 hover:bg-primary/90"
+              onClick={handleDownloadReceipt}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download Receipt
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full py-3"
+              onClick={handleShareReceipt}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share Receipt
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full py-3"
+              onClick={() => setLocation('/')}
+            >
+              Back to Dashboard
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
