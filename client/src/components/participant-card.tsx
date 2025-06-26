@@ -76,51 +76,30 @@ export default function ParticipantCard({
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-3 py-2.5 rounded-lg border transition-all duration-200",
-        config.bgColor,
-        selectable && "hover:border-primary hover:shadow-md cursor-pointer"
+        "flex items-center justify-between px-3 py-2 rounded-lg border border-gray-100 bg-white hover:bg-gray-50 transition-all duration-200",
+        selectable && "hover:border-primary cursor-pointer",
+        paymentStatus === 'paid' && "bg-green-50 border-green-100"
       )}
       onClick={onClick}
     >
-      <div className="flex items-center space-x-2.5 flex-1 min-w-0">
-        <div className={cn(
-          "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
-          config.avatarColor
-        )}>
-          <span className="text-white font-bold text-xs">{initials}</span>
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between">
-            <p className="font-semibold text-gray-900 text-sm truncate">{name}</p>
-            <div className="flex items-center space-x-2 ml-2">
-              <p className={cn("font-bold text-sm", config.textColor)}>{formatCurrency(amount)}</p>
-              {showPayButton && paymentStatus === 'pending' && onPayClick && (
-                <Button
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onPayClick(participant.id);
-                  }}
-                  className="bg-primary text-white hover:bg-primary/90 h-6 px-2 text-xs"
-                >
-                  Pay
-                </Button>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center justify-between mt-0.5">
-            <div className="flex items-center">
-              {phone && <p className="text-xs text-gray-500 truncate mr-2">{phone}</p>}
-            </div>
-            <div className={cn("flex items-center text-xs", config.textColor)}>
-              <StatusIcon className="w-3 h-3 mr-1" />
-              <span>{config.label}</span>
-              {participant.paidAt && (
-                <span className="text-gray-400 ml-1">• {formatDate(participant.paidAt)}</span>
-              )}
-            </div>
-          </div>
-        </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-gray-900 text-sm truncate">{name}</p>
+        {phone && <p className="text-xs text-gray-500 truncate">{phone}</p>}
+      </div>
+      <div className="flex items-center space-x-2 ml-3">
+        <p className="font-bold text-sm text-gray-900">{formatCurrency(amount)}</p>
+        {showPayButton && paymentStatus === 'pending' && onPayClick && (
+          <Button
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPayClick(participant.id);
+            }}
+            className="bg-primary text-white hover:bg-primary/90 h-6 px-2 text-xs"
+          >
+            Pay
+          </Button>
+        )}
       </div>
     </div>
   );
