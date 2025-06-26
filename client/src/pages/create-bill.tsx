@@ -294,7 +294,7 @@ export default function CreateBill() {
           {/* Basic Information */}
           <div className="mobile-card space-y-4">
             <div className="text-center mb-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-1">
                 <Receipt className="h-6 w-6 text-primary" />
               </div>
               <h2 className="text-xl font-bold neon-text">Bill Details</h2>
