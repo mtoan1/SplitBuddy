@@ -102,6 +102,7 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 26, 2025: Redesigned participant cards as ultra-compact list rows - removed all borders, reduced padding to minimum, responsive phone display
 - June 26, 2025: Simplified participant cards to clean list format - removed avatars, status labels, and icons for minimal design
 - June 26, 2025: Made participant cards more compact - reduced height by 40%, optimized layout, and improved information density
 - June 26, 2025: Optimized participant selection screen with modern flat design, improved spacing, and Cake branding

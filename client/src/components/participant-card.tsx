@@ -76,18 +76,22 @@ export default function ParticipantCard({
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-3 py-2 rounded-lg border border-gray-100 bg-white hover:bg-gray-50 transition-all duration-200",
-        selectable && "hover:border-primary cursor-pointer",
-        paymentStatus === 'paid' && "bg-green-50 border-green-100"
+        "flex items-center justify-between px-2 py-1.5 hover:bg-gray-50 transition-colors",
+        selectable && "cursor-pointer hover:bg-primary/5",
+        paymentStatus === 'paid' && "bg-green-50/50"
       )}
       onClick={onClick}
     >
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-gray-900 text-sm truncate">{name}</p>
-        {phone && <p className="text-xs text-gray-500 truncate">{phone}</p>}
+      <div className="flex-1 min-w-0 pr-2">
+        <div className="flex items-baseline space-x-2">
+          <span className="font-medium text-sm text-gray-900 truncate">{name}</span>
+          {phone && <span className="text-xs text-gray-400 hidden sm:inline">•</span>}
+          {phone && <span className="text-xs text-gray-400 truncate hidden sm:inline">{phone}</span>}
+        </div>
+        {phone && <div className="text-xs text-gray-400 truncate sm:hidden">{phone}</div>}
       </div>
-      <div className="flex items-center space-x-2 ml-3">
-        <p className="font-bold text-sm text-gray-900">{formatCurrency(amount)}</p>
+      <div className="flex items-center space-x-2 flex-shrink-0">
+        <span className="font-semibold text-sm text-gray-900">{formatCurrency(amount)}</span>
         {showPayButton && paymentStatus === 'pending' && onPayClick && (
           <Button
             size="sm"
@@ -95,7 +99,7 @@ export default function ParticipantCard({
               e.stopPropagation();
               onPayClick(participant.id);
             }}
-            className="bg-primary text-white hover:bg-primary/90 h-6 px-2 text-xs"
+            className="bg-primary text-white hover:bg-primary/90 h-5 px-1.5 text-xs font-medium"
           >
             Pay
           </Button>

@@ -107,7 +107,7 @@ export default function ParticipantSelection() {
         <div className="space-y-3">
           <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-wide">Choose Your Name</h3>
           
-          <div className="space-y-1">
+          <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
             {unpaidParticipants.map((participant: any) => (
               <ParticipantCard
                 key={participant.id}
