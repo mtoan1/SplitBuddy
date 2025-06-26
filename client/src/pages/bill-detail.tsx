@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Bell, Receipt, Users, Share2, Copy, QrCode, Home, ArrowLeft } from "lucide-react";
+import { Plus, Bell, Receipt, Users, QrCode, Home, ArrowLeft } from "lucide-react";
 import QRCodeDisplay from "@/components/qr-code-display";
 import ParticipantCard from "@/components/participant-card";
 import { formatCurrency, formatDate, calculatePaidPercentage, calculateTotalPaid } from "@/lib/utils";
@@ -206,35 +206,7 @@ export default function BillDetail() {
           </CardContent>
         </Card>
 
-        {/* Sharing Options */}
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Share with Friends</h3>
-            <div className="space-y-3">
-              <Button 
-                variant="outline" 
-                className="w-full justify-start"
-                onClick={handleShare}
-              >
-                <Share2 className="w-4 h-4 mr-2" />
-                Share Bill Link
-              </Button>
-              <div className="flex items-center space-x-2">
-                <div className="flex-1 p-2 bg-gray-100 rounded text-sm text-gray-600 truncate">
-                  {shareUrl}
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="border-primary text-primary hover:bg-primary/10"
-                  onClick={() => navigator.clipboard.writeText(shareUrl)}
-                >
-                  <Copy className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+
 
         {/* Participants List */}
         <Card>
