@@ -138,8 +138,15 @@ export default function CreateBill() {
     ];
     const randomBusiness = businessNames[Math.floor(Math.random() * businessNames.length)];
     
+    // Generate random bill date within the last 30 days
+    const today = new Date();
+    const daysBack = Math.floor(Math.random() * 30);
+    const randomDate = new Date(today.getTime() - (daysBack * 24 * 60 * 60 * 1000));
+    const formattedDate = randomDate.toISOString().split('T')[0];
+    
     form.setValue("totalAmount", randomAmount);
     form.setValue("merchantName", randomBusiness);
+    form.setValue("billDate", formattedDate);
     
     toast({
       title: "Receipt Processed",
