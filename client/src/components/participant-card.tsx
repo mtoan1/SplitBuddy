@@ -30,74 +30,29 @@ export default function ParticipantCard({
   onPayClick 
 }: ParticipantCardProps) {
   const { name, phone, amountToPay, paymentStatus } = participant;
-  const initials = getInitials(name);
   const amount = parseFloat(amountToPay || '0');
-
-  const getStatusConfig = () => {
-    switch (paymentStatus) {
-      case 'paid':
-        return {
-          bgColor: 'bg-green-50 border-green-100',
-          avatarColor: 'bg-green-500',
-          textColor: 'text-green-600',
-          icon: CheckCircle,
-          label: 'Paid'
-        };
-      case 'failed':
-        return {
-          bgColor: 'bg-red-50 border-red-100',
-          avatarColor: 'bg-red-500',
-          textColor: 'text-red-600',
-          icon: XCircle,
-          label: 'Failed'
-        };
-      case 'overdue':
-        return {
-          bgColor: 'bg-red-50 border-red-100',
-          avatarColor: 'bg-red-500',
-          textColor: 'text-red-600',
-          icon: AlertTriangle,
-          label: 'Overdue'
-        };
-      default:
-        return {
-          bgColor: 'bg-orange-50 border-orange-100',
-          avatarColor: 'bg-orange-400',
-          textColor: 'text-orange-600',
-          icon: Clock,
-          label: 'Pending'
-        };
-    }
-  };
-
-  const config = getStatusConfig();
-  const StatusIcon = config.icon;
 
   return (
     <div
       className={cn(
-        "flex items-center justify-between py-2 hover:bg-gray-50/50 transition-colors",
-        selectable && "cursor-pointer",
-        paymentStatus === 'paid' && "text-green-600"
+        "flex items-center justify-between py-1 hover:bg-gray-50",
+        selectable && "cursor-pointer"
       )}
       onClick={onClick}
     >
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center space-x-1">
-          <span className="font-medium text-sm truncate">{name}</span>
-          {phone && <span className="text-xs text-gray-400">•</span>}
-          {phone && <span className="text-xs text-gray-400 truncate">{phone}</span>}
-        </div>
+      <div className="flex-1">
+        <span className="text-sm font-medium">{name}</span>
+        {phone && <span className="text-xs text-gray-500 ml-2">{phone}</span>}
       </div>
-      <div className="flex items-center space-x-2 ml-4">
-        <span className="font-semibold text-sm">{formatCurrency(amount)}</span>
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-semibold">{formatCurrency(amount)}</span>
         {showPayButton && paymentStatus === 'pending' && onPayClick && (
           <button
             onClick={(e) => {
               e.stopPropagation();
               onPayClick(participant.id);
             }}
-            className="bg-primary text-white px-2 py-0.5 rounded text-xs font-medium hover:bg-primary/90"
+            className="bg-primary text-white px-1.5 py-0.5 rounded text-xs"
           >
             Pay
           </button>
