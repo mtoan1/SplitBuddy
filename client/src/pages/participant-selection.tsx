@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, ArrowLeft, Home, Search } from "lucide-react";
-import ParticipantCard from "@/components/participant-card";
+import SimpleParticipantList from "@/components/simple-participant-list";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -107,17 +107,10 @@ export default function ParticipantSelection() {
         <div className="space-y-3">
           <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-wide">Choose Your Name</h3>
           
-          <div className="bg-white rounded border divide-y divide-gray-100">
-            {unpaidParticipants.map((participant: any) => (
-              <div key={participant.id} className="px-3">
-                <ParticipantCard
-                  participant={participant}
-                  onClick={() => handleSelectParticipant(participant.id)}
-                  selectable
-                />
-              </div>
-            ))}
-          </div>
+          <SimpleParticipantList
+            participants={unpaidParticipants}
+            onSelect={handleSelectParticipant}
+          />
         </div>
 
         {/* Alternative Phone Entry */}
