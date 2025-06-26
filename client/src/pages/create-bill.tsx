@@ -40,8 +40,7 @@ export default function CreateBill() {
       merchantName: '',
       billDate: new Date().toISOString().split('T')[0],
       status: 'created',
-      splitMethod: 'equal',
-      participantCount: 2
+      splitMethod: 'equal'
     }
   });
 
@@ -349,7 +348,7 @@ export default function CreateBill() {
                   type="number"
                   min="2"
                   max="20"
-                  defaultValue="2"
+                  placeholder="Enter number of people"
                   {...form.register('participantCount', { valueAsNumber: true })}
                   className="mobile-input text-xl font-bold text-primary"
                 />
