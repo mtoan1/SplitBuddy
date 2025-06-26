@@ -313,7 +313,7 @@ export default function CreateBill() {
             </div>
           </div>
 
-          {/* Smart Processing Section - Moved to top */}
+          {/* Smart Processing Section */}
           <div className="mobile-card">
             <div className="flex items-center mb-6">
               <Upload className="w-6 h-6 text-primary mr-3" />
