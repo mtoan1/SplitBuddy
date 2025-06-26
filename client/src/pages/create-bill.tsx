@@ -294,8 +294,8 @@ export default function CreateBill() {
           {/* Basic Information */}
           <div className="mobile-card space-y-6">
             <div className="text-center mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-primary/15 to-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 neon-glow">
-                <Receipt className="h-10 w-10 text-primary" />
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <Receipt className="h-6 w-6 text-primary" />
               </div>
               <h2 className="text-xl font-bold neon-text">Bill Details</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">Enter the basic information</p>
