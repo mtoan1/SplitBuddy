@@ -155,8 +155,8 @@ export default function CreateBill() {
   };
 
   const handleGroupPhotoUpload = () => {
-    // Generate random people count between 2 and 8
-    const randomPeople = Math.floor(Math.random() * 7 + 2);
+    // Generate random people count between 5 and 12
+    const randomPeople = Math.floor(Math.random() * 8 + 5);
     form.setValue("participantCount", randomPeople);
     
     toast({
