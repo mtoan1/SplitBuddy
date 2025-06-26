@@ -102,6 +102,10 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 26, 2025: Moved smart processing section to top of create bill screen with auto-fill functionality
+- June 26, 2025: Added automatic total amount generation (100-5000) when receipt photo is uploaded
+- June 26, 2025: Added automatic people count generation (2-8) when group photo is uploaded
+- June 26, 2025: Implemented participant sorting with bill owner first, then alphabetical order
 - June 25, 2025: Updated bill detail screen buttons to use primary pink color scheme instead of blue
 - June 25, 2025: Updated "My Bills" button with Receipt icon and matching primary color scheme
 - June 25, 2025: Sorted bill lists by creation date (newest first) on homepage and bills dashboard
