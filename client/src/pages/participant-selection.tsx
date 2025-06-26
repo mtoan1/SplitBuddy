@@ -105,8 +105,6 @@ export default function ParticipantSelection() {
 
         {/* Participant Selection */}
         <div className="space-y-3">
-          <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-wide">Choose Your Name</h3>
-          
           <SimpleParticipantList
             participants={unpaidParticipants}
             onSelect={handleSelectParticipant}
@@ -114,11 +112,8 @@ export default function ParticipantSelection() {
         </div>
 
         {/* Alternative Phone Entry */}
-        <div className="mobile-card p-4 space-y-4">
+        <div className="mobile-card p-4 space-y-3">
           <div className="text-center">
-            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Search className="h-4 w-4 text-primary" />
-            </div>
             <p className="text-sm text-gray-600">Don't see your name?</p>
           </div>
           <div className="space-y-3">

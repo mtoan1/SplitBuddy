@@ -224,7 +224,7 @@ export default function CreateBill() {
     
     if (createdBillId) {
       console.log('Navigating to participants page for bill:', createdBillId);
-      setLocation(`/bill/${createdBillId}/participants`);
+      setLocation(`/bills/${createdBillId}/participants`);
     } else {
       console.error('No createdBillId available for navigation');
     }
