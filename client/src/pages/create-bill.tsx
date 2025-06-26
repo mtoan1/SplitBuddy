@@ -125,6 +125,28 @@ export default function CreateBill() {
     }
   };
 
+  const handleReceiptUpload = () => {
+    // Generate random amount between 100 and 5000
+    const randomAmount = (Math.random() * 4900 + 100).toFixed(2);
+    form.setValue("totalAmount", randomAmount);
+    
+    toast({
+      title: "Receipt Processed",
+      description: `Total amount auto-filled: $${randomAmount}`,
+    });
+  };
+
+  const handleGroupPhotoUpload = () => {
+    // Generate random people count between 2 and 8
+    const randomPeople = Math.floor(Math.random() * 7 + 2);
+    form.setValue("participantCount", randomPeople);
+    
+    toast({
+      title: "Group Photo Processed", 
+      description: `${randomPeople} people detected and auto-filled`,
+    });
+  };
+
   const onSubmit = (data: CreateBillForm) => {
     console.log('Form submitted with data:', data);
     console.log('Form errors:', form.formState.errors);
@@ -213,8 +235,6 @@ export default function CreateBill() {
       </header>
 
       <div className="mobile-content">
-
-        {/* Bill Form */}
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
           <div className="mobile-card space-y-6">
@@ -293,10 +313,57 @@ export default function CreateBill() {
             </div>
           </div>
 
-          {/* Image Upload Section */}
+          {/* Smart Processing Section - Moved to top */}
           <div className="mobile-card">
             <div className="flex items-center mb-6">
               <Upload className="w-6 h-6 text-primary mr-3" />
+              <div>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Smart Processing</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Upload photos for auto-fill</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Receipt Photo
+                </label>
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer"
+                     onClick={handleReceiptUpload}>
+                  <Receipt className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    Upload receipt for auto-fill total amount
+                  </p>
+                  <Button type="button" variant="outline" size="sm">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Choose File
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Group Photo
+                </label>
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer"
+                     onClick={handleGroupPhotoUpload}>
+                  <Users className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    Upload group photo for participant detection
+                  </p>
+                  <Button type="button" variant="outline" size="sm">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Choose File
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bill Form */}
+          <div className="mobile-card">
+            <div className="flex items-center mb-6">
+              <Receipt className="w-6 h-6 text-primary mr-3" />
               <div>
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">Smart Processing (Optional)</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Upload images for AI assistance or skip to create manually</p>
