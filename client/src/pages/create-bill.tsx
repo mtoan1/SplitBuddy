@@ -292,15 +292,15 @@ export default function CreateBill() {
           </div>
 
           {/* Basic Information */}
-          <div className="mobile-card space-y-6">
-            <div className="text-center mb-6">
-              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+          <div className="mobile-card space-y-4">
+            <div className="text-center mb-4">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-2">
                 <Receipt className="h-6 w-6 text-primary" />
               </div>
               <h2 className="text-xl font-bold neon-text">Bill Details</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">Enter the basic information</p>
             </div>
-            <div className="space-y-5">
+            <div className="space-y-4">
               <div>
                 <Label htmlFor="merchantName" className="text-sm font-bold text-gray-700 dark:text-gray-300">Business Name</Label>
                 <Input
