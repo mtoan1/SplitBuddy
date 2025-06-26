@@ -349,7 +349,7 @@ export default function CreateBill() {
                   type="number"
                   min="2"
                   max="20"
-                  placeholder="2"
+                  defaultValue="2"
                   {...form.register('participantCount', { valueAsNumber: true })}
                   className="mobile-input text-xl font-bold text-primary"
                 />
