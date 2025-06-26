@@ -76,50 +76,51 @@ export default function ParticipantCard({
   return (
     <div
       className={cn(
-        "flex items-center justify-between p-4 rounded-xl border transition-all duration-200",
+        "flex items-center justify-between px-3 py-2.5 rounded-lg border transition-all duration-200",
         config.bgColor,
-        selectable && "hover:border-primary hover:shadow-lg hover:shadow-primary/20 cursor-pointer"
+        selectable && "hover:border-primary hover:shadow-md cursor-pointer"
       )}
       onClick={onClick}
     >
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2.5 flex-1 min-w-0">
         <div className={cn(
-          "w-10 h-10 rounded-full flex items-center justify-center border border-white/30 shadow-sm",
+          "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0",
           config.avatarColor
         )}>
-          <span className="text-white font-bold text-sm">{initials}</span>
+          <span className="text-white font-bold text-xs">{initials}</span>
         </div>
-        <div>
-          <p className="font-semibold text-gray-900 dark:text-white">{name}</p>
-          {phone && <p className="text-xs text-gray-500">{phone}</p>}
-        </div>
-      </div>
-      <div className="flex items-center space-x-2">
-        <div className="text-right">
-          <p className={cn("font-semibold", config.textColor)}>{formatCurrency(amount)}</p>
-          <div className={cn("flex items-center text-xs", config.textColor)}>
-            <StatusIcon className="w-3 h-3 mr-1" />
-            <span>{config.label}</span>
-          </div>
-          {participant.paidAt && (
-            <div className="text-xs text-gray-500 mt-1">
-              {formatDate(participant.paidAt)}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between">
+            <p className="font-semibold text-gray-900 text-sm truncate">{name}</p>
+            <div className="flex items-center space-x-2 ml-2">
+              <p className={cn("font-bold text-sm", config.textColor)}>{formatCurrency(amount)}</p>
+              {showPayButton && paymentStatus === 'pending' && onPayClick && (
+                <Button
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onPayClick(participant.id);
+                  }}
+                  className="bg-primary text-white hover:bg-primary/90 h-6 px-2 text-xs"
+                >
+                  Pay
+                </Button>
+              )}
             </div>
-          )}
+          </div>
+          <div className="flex items-center justify-between mt-0.5">
+            <div className="flex items-center">
+              {phone && <p className="text-xs text-gray-500 truncate mr-2">{phone}</p>}
+            </div>
+            <div className={cn("flex items-center text-xs", config.textColor)}>
+              <StatusIcon className="w-3 h-3 mr-1" />
+              <span>{config.label}</span>
+              {participant.paidAt && (
+                <span className="text-gray-400 ml-1">• {formatDate(participant.paidAt)}</span>
+              )}
+            </div>
+          </div>
         </div>
-        {showPayButton && paymentStatus === 'pending' && onPayClick && (
-          <Button
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onPayClick(participant.id);
-            }}
-            className="bg-gradient-to-r from-primary to-primary/80 text-white hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-primary/30 border-0"
-          >
-            <CreditCard className="w-3 h-3 mr-1" />
-            Pay
-          </Button>
-        )}
       </div>
     </div>
   );

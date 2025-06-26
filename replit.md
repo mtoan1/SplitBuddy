@@ -102,6 +102,7 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 26, 2025: Made participant cards more compact - reduced height by 40%, optimized layout, and improved information density
 - June 26, 2025: Optimized participant selection screen with modern flat design, improved spacing, and Cake branding
 - June 26, 2025: Added automatic bill date generation (random date within last 30 days) when receipt photo is uploaded
 - June 26, 2025: Added automatic business name generation when receipt photo is uploaded
