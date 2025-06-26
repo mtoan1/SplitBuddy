@@ -128,11 +128,23 @@ export default function CreateBill() {
   const handleReceiptUpload = () => {
     // Generate random amount between 100 and 5000
     const randomAmount = (Math.random() * 4900 + 100).toFixed(2);
+    
+    // Generate random business name
+    const businessNames = [
+      "Pho Saigon", "Cafe Sua Da", "Banh Mi Express", "Golden Dragon", "Saigon Street",
+      "Lotus Garden", "Rice Paper", "Mekong Bistro", "Bamboo House", "Noodle Bowl",
+      "Zen Garden", "Morning Glory", "Thuan Kieu", "Pho King", "Com Tam Central",
+      "Bun Bo Hue", "Cafe Highlands", "Pizza Palace", "Burger Station", "Taco Bell",
+      "Starbucks", "McDonald's", "KFC", "Domino's Pizza", "Subway"
+    ];
+    const randomBusiness = businessNames[Math.floor(Math.random() * businessNames.length)];
+    
     form.setValue("totalAmount", randomAmount);
+    form.setValue("merchantName", randomBusiness);
     
     toast({
       title: "Receipt Processed",
-      description: `Total amount auto-filled: $${randomAmount}`,
+      description: `${randomBusiness} - $${randomAmount} auto-filled`,
     });
   };
 
