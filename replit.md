@@ -102,6 +102,7 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 26, 2025: Made manual participants screen compact to match Bill Details design - reduced padding, simplified headers, streamlined form layout
 - June 26, 2025: Removed section labels from participant selection screen for cleaner UI
 - June 26, 2025: Converted to pure list format - removed all card styling, using simple rows with thin dividers between items
 - June 26, 2025: Redesigned participant cards as ultra-compact list rows - removed all borders, reduced padding to minimum, responsive phone display

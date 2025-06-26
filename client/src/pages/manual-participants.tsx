@@ -194,14 +194,16 @@ export default function ManualParticipants() {
   const remaining = billTotal - totalAssigned;
 
   return (
-    <div className="mobile-container">
-      <div className="mobile-content">
+    <div className="max-w-md mx-auto bg-gradient-to-br from-white to-gray-50 min-h-screen">
+      <div className="p-5 space-y-4">
         {/* Header */}
-        <div className="flex items-center mb-6">
-          <Button variant="ghost" size="icon" onClick={() => setLocation('/')}>
-            <ArrowLeft className="h-4 w-4" />
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" size="sm" onClick={() => setLocation('/')}>
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back
           </Button>
-          <h1 className="text-xl font-semibold text-text-primary ml-4">Review Participants</h1>
+          <h1 className="text-lg font-bold neon-text">Review Participants</h1>
+          <div></div>
         </div>
 
         {billQuery.isLoading ? (
@@ -213,112 +215,99 @@ export default function ManualParticipants() {
         ) : (
           <>
             {/* Bill Summary */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center text-text-primary">
-                  <Users className="w-5 h-5 mr-2" />
-                  Bill Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <p><span className="font-medium">Merchant:</span> {billQuery.data.merchantName}</p>
-                  <p><span className="font-medium">Total:</span> {formatCurrency(billTotal)}</p>
-                  <p><span className="font-medium">Date:</span> {new Date(billQuery.data.billDate).toLocaleDateString()}</p>
+            <div className="mobile-card p-4 space-y-3">
+              <div className="text-center">
+                <h3 className="font-bold text-lg neon-text">{billQuery.data.merchantName}</h3>
+                <div className="text-2xl font-bold text-primary">{formatCurrency(billTotal)}</div>
+                <p className="text-xs text-gray-500">{new Date(billQuery.data.billDate).toLocaleDateString()}</p>
+              </div>
+              
+              {/* Split Summary */}
+              <div className="bg-gray-50 rounded-lg p-3 space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span>Assigned:</span>
+                  <span className={totalAssigned > billTotal ? 'text-red-500' : 'text-green-600'}>
+                    {formatCurrency(totalAssigned)}
+                  </span>
                 </div>
-                
-                {/* Split Summary */}
-                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                  <div className="flex justify-between text-sm">
-                    <span>Assigned:</span>
-                    <span className={totalAssigned > billTotal ? 'text-red-500' : 'text-green-600'}>
-                      {formatCurrency(totalAssigned)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm font-medium">
-                    <span>Remaining:</span>
-                    <span className={remaining < 0 ? 'text-red-500' : remaining > 0 ? 'text-orange-500' : 'text-green-600'}>
-                      {formatCurrency(remaining)}
-                    </span>
-                  </div>
+                <div className="flex justify-between text-sm font-medium">
+                  <span>Remaining:</span>
+                  <span className={remaining < 0 ? 'text-red-500' : remaining > 0 ? 'text-orange-500' : 'text-green-600'}>
+                    {formatCurrency(remaining)}
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Participants Display/Edit */}
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-text-primary">Participants ({currentParticipants.length})</CardTitle>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="mobile-card p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-semibold text-gray-900">Participants ({fields.length})</span>
+                  <div className="flex space-x-2">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => append({ name: '', phone: '', amountToPay: '' })}
+                      onClick={redistributeRemaining}
+                      className="text-xs h-6 px-2"
                     >
-                      <Plus className="w-4 h-4 mr-1" />
-                      Add Person
+                      Redistribute
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => append({ name: '', phone: '', amountToPay: '0.00' })}
+                      className="h-6 px-2"
+                    >
+                      <Plus className="w-3 h-3 mr-1" />
+                      Add
                     </Button>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
+                </div>
+                <div className="space-y-3">
                   {fields.map((field, index) => {
                     const isOwner = index === 0;
                     return (
-                      <div 
-                        key={field.id} 
-                        className={`mobile-card space-y-3 ${isOwner ? 'bg-primary/5 border-primary/20' : ''}`}
-                      >
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-medium">
-                              {form.watch(`participants.${index}.name`) || (isOwner ? 'Bill Owner' : `Person ${index + 1}`)}
-                            </h3>
-                            {isOwner && (
-                              <Badge variant="default" className="bg-primary/10 text-primary border-primary/20">
-                                <Crown className="w-3 h-3 mr-1" />
-                                Owner
-                              </Badge>
-                            )}
-                          </div>
-                          {fields.length > 1 && !isOwner && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => remove(index)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          )}
-                        </div>
+                      <div key={field.id} className="p-3 border border-gray-200 rounded-lg space-y-2 relative">
+                        {fields.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => remove(index)}
+                            className="absolute top-1 right-1 text-red-500 hover:text-red-700 p-1 h-6 w-6"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        )}
                         
-                        <div className="grid grid-cols-2 gap-3">
+                        {isOwner && (
+                          <Badge variant="secondary" className="text-xs h-5">
+                            <Crown className="w-3 h-3 mr-1" />
+                            Owner
+                          </Badge>
+                        )}
+
+                        <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <Label htmlFor={`participants.${index}.name`} className="text-xs font-bold text-gray-700 dark:text-gray-300">Name</Label>
+                            <Label className="text-xs text-gray-600">Name</Label>
                             <Input
                               {...form.register(`participants.${index}.name`)}
                               placeholder="Enter name"
-                              className="mobile-input"
+                              className="h-8 text-sm"
                             />
-                            {form.formState.errors.participants?.[index]?.name && (
-                              <p className="text-xs text-red-500 mt-1">
-                                {form.formState.errors.participants[index]?.name?.message}
-                              </p>
-                            )}
                           </div>
 
                           <div>
-                            <Label htmlFor={`participants.${index}.amountToPay`} className="text-xs font-bold text-gray-700 dark:text-gray-300">
-                              Amount {isOwner && '(+remainder)'}
-                            </Label>
+                            <Label className="text-xs text-gray-600">Amount</Label>
                             <Input
                               {...form.register(`participants.${index}.amountToPay`)}
                               type="number"
                               step="0.01"
                               placeholder="0.00"
-                              className={`mobile-input ${isOwner ? 'font-bold text-primary' : ''}`}
+                              className={`h-8 text-sm ${isOwner ? 'font-bold text-primary' : ''}`}
                               onChange={(e) => {
                                 if (validateAmount(e.target.value)) {
                                   form.register(`participants.${index}.amountToPay`).onChange(e);
@@ -327,69 +316,57 @@ export default function ManualParticipants() {
                                 }
                               }}
                             />
-                            {form.formState.errors.participants?.[index]?.amountToPay && (
-                              <p className="text-xs text-red-500 mt-1">
-                                {form.formState.errors.participants[index]?.amountToPay?.message}
-                              </p>
-                            )}
                           </div>
                         </div>
 
                         <div>
-                          <Label htmlFor={`participants.${index}.phone`} className="text-xs font-bold text-gray-700 dark:text-gray-300">Phone</Label>
+                          <Label className="text-xs text-gray-600">Phone</Label>
                           <Input
                             {...form.register(`participants.${index}.phone`)}
-                            placeholder="e.g., +84 123 456 789"
-                            className="mobile-input"
+                            placeholder="+1 (555) 000-0000"
+                            className="h-8 text-sm"
                           />
-                          {form.formState.errors.participants?.[index]?.phone && (
-                            <p className="text-xs text-red-500 mt-1">
-                              {form.formState.errors.participants[index]?.phone?.message}
-                            </p>
-                          )}
                         </div>
                       </div>
                     );
                   })}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Summary Card */}
-              <Card className="mobile-card bg-gray-50 dark:bg-gray-800/50">
-                <CardContent className="p-4">
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">Bill Total:</span>
-                      <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(billTotal)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">Total Assigned:</span>
-                      <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(totalAssigned)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm border-t pt-2">
-                      <span className="text-gray-600 dark:text-gray-400">Remaining:</span>
-                      <span className={`font-bold ${Math.abs(remaining) > 0.01 ? 'text-red-500' : 'text-green-600'}`}>
-                        {formatCurrency(remaining)}
-                      </span>
-                    </div>
+              <div className="mobile-card p-3 bg-gray-50">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Bill Total:</span>
+                    <span className="font-semibold">{formatCurrency(billTotal)}</span>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="flex justify-between text-sm">
+                    <span>Total Assigned:</span>
+                    <span className="font-semibold">{formatCurrency(totalAssigned)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm border-t pt-2">
+                    <span>Remaining:</span>
+                    <span className={`font-bold ${Math.abs(remaining) > 0.01 ? 'text-red-500' : 'text-green-600'}`}>
+                      {formatCurrency(remaining)}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
               <div className="space-y-3">
                 <Button
                   type="submit"
-                  className="w-full bg-primary text-white py-4"
+                  className="w-full bg-primary text-white py-3 hover:bg-primary/90"
                   disabled={createParticipantsMutation.isPending || Math.abs(remaining) > 0.01}
                 >
                   {createParticipantsMutation.isPending ? 'Saving Changes...' : 'Continue to Bill Details'}
                 </Button>
                 
                 {Math.abs(remaining) > 0.01 && (
-                  <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                    <p className="text-sm text-amber-700 dark:text-amber-300 text-center">
+                  <div className="p-2 bg-amber-50 rounded-lg border border-amber-200">
+                    <p className="text-xs text-amber-700 text-center">
                       {remaining > 0 ? 'Under-allocated by' : 'Over-allocated by'} {formatCurrency(Math.abs(remaining))}. 
-                      Use "Redistribute" to balance automatically or adjust amounts manually.
+                      Use "Redistribute" to balance.
                     </p>
                   </div>
                 )}
