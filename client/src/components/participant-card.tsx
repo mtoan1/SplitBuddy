@@ -76,33 +76,31 @@ export default function ParticipantCard({
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-2 py-1.5 hover:bg-gray-50 transition-colors",
-        selectable && "cursor-pointer hover:bg-primary/5",
-        paymentStatus === 'paid' && "bg-green-50/50"
+        "flex items-center justify-between py-2 hover:bg-gray-50/50 transition-colors",
+        selectable && "cursor-pointer",
+        paymentStatus === 'paid' && "text-green-600"
       )}
       onClick={onClick}
     >
-      <div className="flex-1 min-w-0 pr-2">
-        <div className="flex items-baseline space-x-2">
-          <span className="font-medium text-sm text-gray-900 truncate">{name}</span>
-          {phone && <span className="text-xs text-gray-400 hidden sm:inline">•</span>}
-          {phone && <span className="text-xs text-gray-400 truncate hidden sm:inline">{phone}</span>}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center space-x-1">
+          <span className="font-medium text-sm truncate">{name}</span>
+          {phone && <span className="text-xs text-gray-400">•</span>}
+          {phone && <span className="text-xs text-gray-400 truncate">{phone}</span>}
         </div>
-        {phone && <div className="text-xs text-gray-400 truncate sm:hidden">{phone}</div>}
       </div>
-      <div className="flex items-center space-x-2 flex-shrink-0">
-        <span className="font-semibold text-sm text-gray-900">{formatCurrency(amount)}</span>
+      <div className="flex items-center space-x-2 ml-4">
+        <span className="font-semibold text-sm">{formatCurrency(amount)}</span>
         {showPayButton && paymentStatus === 'pending' && onPayClick && (
-          <Button
-            size="sm"
+          <button
             onClick={(e) => {
               e.stopPropagation();
               onPayClick(participant.id);
             }}
-            className="bg-primary text-white hover:bg-primary/90 h-5 px-1.5 text-xs font-medium"
+            className="bg-primary text-white px-2 py-0.5 rounded text-xs font-medium hover:bg-primary/90"
           >
             Pay
-          </Button>
+          </button>
         )}
       </div>
     </div>

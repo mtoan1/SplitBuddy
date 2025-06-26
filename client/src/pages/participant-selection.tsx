@@ -107,14 +107,18 @@ export default function ParticipantSelection() {
         <div className="space-y-3">
           <h3 className="font-semibold text-gray-900 text-sm uppercase tracking-wide">Choose Your Name</h3>
           
-          <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
-            {unpaidParticipants.map((participant: any) => (
-              <ParticipantCard
-                key={participant.id}
-                participant={participant}
-                onClick={() => handleSelectParticipant(participant.id)}
-                selectable
-              />
+          <div className="space-y-0">
+            {unpaidParticipants.map((participant: any, index: number) => (
+              <div key={participant.id}>
+                <ParticipantCard
+                  participant={participant}
+                  onClick={() => handleSelectParticipant(participant.id)}
+                  selectable
+                />
+                {index < unpaidParticipants.length - 1 && (
+                  <div className="border-b border-gray-100"></div>
+                )}
+              </div>
             ))}
           </div>
         </div>
