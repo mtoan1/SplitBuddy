@@ -20,10 +20,10 @@ function Router() {
       <Route path="/bills" component={BillDashboard} />
       <Route path="/create-bill" component={CreateBill} />
       <Route path="/bill/:id/participants" component={ManualParticipants} />
-      <Route path="/bill/:id" component={BillDetail} />
       <Route path="/bills/:id/participants" component={ParticipantSelection} />
       <Route path="/payment/:billId/:participantId" component={PaymentFlow} />
       <Route path="/payment-success/:billId/:participantId" component={PaymentSuccess} />
+      <Route path="/bill/:id" component={BillDetail} />
       <Route component={NotFound} />
     </Switch>
   );
