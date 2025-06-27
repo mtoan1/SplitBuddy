@@ -1,4 +1,5 @@
 import { formatCurrency } from "@/lib/utils";
+import { CheckCircle } from "lucide-react";
 
 interface Participant {
   id: string;

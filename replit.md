@@ -102,6 +102,7 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 27, 2025: Added green checkmark icon for paid participants on selection screen for visual payment status clarity
 - June 27, 2025: Fixed shared link routing to go to participant selection screen (/bills/:id/participants) instead of bill details
 - June 27, 2025: Fixed shared link routing issue - moved /bill/:id route to end to prevent conflicts with more specific routes
 - June 26, 2025: Made manual participants screen compact to match Bill Details design - reduced padding, simplified headers, streamlined form layout
