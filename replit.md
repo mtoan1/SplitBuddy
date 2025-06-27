@@ -102,6 +102,7 @@ Key enums define status types:
 
 ## Recent Changes
 
+- June 27, 2025: Fixed shared link routing to go to participant selection screen (/bills/:id/participants) instead of bill details
 - June 27, 2025: Fixed shared link routing issue - moved /bill/:id route to end to prevent conflicts with more specific routes
 - June 26, 2025: Made manual participants screen compact to match Bill Details design - reduced padding, simplified headers, streamlined form layout
 - June 26, 2025: Removed section labels from participant selection screen for cleaner UI
