@@ -310,7 +310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         process.env.REPLIT_DOMAINS?.split(',')[0] || 
         `http://localhost:5000`;
       
-      const shareUrl = `${baseUrl}/participant-selection/${billId}`;
+      const shareUrl = `${baseUrl}/bill/${billId}`;
 
       // Generate QR code with enhanced styling
       const qrCodeDataUrl = await QRCode.toDataURL(shareUrl, {
