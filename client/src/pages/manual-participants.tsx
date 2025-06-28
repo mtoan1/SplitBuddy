@@ -477,33 +477,36 @@ export default function ManualParticipants() {
                     )}
                   </div>
 
-                  {/* Optimized Form Layout */}
-                  <div className="grid grid-cols-12 gap-2 items-center">
-                    {/* Name - 4 columns */}
-                    <div className="col-span-4">
-                      <Input
-                        {...form.register(`participants.${index}.name`)}
-                        placeholder="Full name"
-                        className="h-8 text-sm bg-white rounded-lg border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
-                      />
+                  {/* Optimized Layout: Name/Phone on Left, Amount on Right */}
+                  <div className="flex items-center justify-between gap-3">
+                    {/* Left Side: Name and Phone in Vertical Stack */}
+                    <div className="flex-1 grid grid-cols-2 gap-2">
+                      {/* Name Field */}
+                      <div>
+                        <Input
+                          {...form.register(`participants.${index}.name`)}
+                          placeholder="Full name"
+                          className="h-8 text-sm font-bold bg-white rounded-lg border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
+
+                      {/* Phone Field */}
+                      <div>
+                        <Input
+                          {...form.register(`participants.${index}.phone`)}
+                          placeholder="+84 xxx xxx xxx"
+                          className="h-8 text-xs text-gray-500 bg-white rounded-lg border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
+                        />
+                      </div>
                     </div>
 
-                    {/* Phone - 3 columns */}
-                    <div className="col-span-3">
-                      <Input
-                        {...form.register(`participants.${index}.phone`)}
-                        placeholder="+84 xxx"
-                        className="h-8 text-sm bg-white rounded-lg border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
-                      />
-                    </div>
-
-                    {/* Amount - 5 columns (wider as requested) */}
-                    <div className="col-span-5">
+                    {/* Right Side: Amount Field (Wider) */}
+                    <div className="w-32">
                       <FormattedNumberInput
                         value={form.watch(`participants.${index}.amountToPay`) || ''}
                         onChange={(value) => handleAmountChange(index, value)}
                         placeholder="0"
-                        className={`h-8 text-sm font-semibold rounded-lg border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary ${
+                        className={`h-8 text-sm font-bold text-right rounded-lg border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary ${
                           isOwner ? 'text-primary bg-primary/5' : 'text-gray-900 bg-white'
                         } ${isManuallyEdited ? 'border-blue-300 bg-blue-50' : ''}`}
                       />
