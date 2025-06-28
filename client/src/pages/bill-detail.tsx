@@ -56,9 +56,13 @@ export default function BillDetail() {
   });
 
   const sendIndividualReminderMutation = useMutation({
-    mutationFn: ({ participantId }: { participantId: string }) => 
+    mutationFn: (participantId: string) => 
       apiRequest('POST', `/api/chillbill/bills/${billId}/participants/${participantId}/send-reminder`, {}),
-    onSuccess: (_, { participantName }) => {
+    onSuccess: (data, participantId) => {
+      // Find the participant name from the participants array
+      const participant = participants.find(p => p.id === participantId);
+      const participantName = participant?.name || 'participant';
+      
       toast({
         title: "Reminder Sent",
         description: `A payment reminder has been sent to ${participantName}.`,
@@ -78,7 +82,7 @@ export default function BillDetail() {
   };
 
   const handleRemindClick = (participantId: string, participantName: string) => {
-    sendIndividualReminderMutation.mutate({ participantId, participantName });
+    sendIndividualReminderMutation.mutate(participantId);
   };
 
   // Separate bill owner from other participants
