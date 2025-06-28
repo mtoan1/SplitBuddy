@@ -68,7 +68,8 @@ export default function BillDetail() {
         description: `A payment reminder has been sent to ${participantName}.`,
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Individual reminder error:', error);
       toast({
         title: "Error",
         description: "Failed to send reminder. Please try again.",
@@ -82,6 +83,7 @@ export default function BillDetail() {
   };
 
   const handleRemindClick = (participantId: string, participantName: string) => {
+    console.log('Sending reminder to participant:', participantId, participantName);
     sendIndividualReminderMutation.mutate(participantId);
   };
 
