@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Clock, XCircle, AlertTriangle, CreditCard } from "lucide-react";
+import { CheckCircle, Clock, XCircle, AlertTriangle, CreditCard, Bell } from "lucide-react";
 import { formatCurrency, getInitials, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +19,9 @@ interface ParticipantCardProps {
   onClick?: () => void;
   selectable?: boolean;
   showPayButton?: boolean;
+  showRemindButton?: boolean;
   onPayClick?: (participantId: string) => void;
+  onRemindClick?: (participantId: string, participantName: string) => void;
 }
 
 export default function ParticipantCard({ 
@@ -27,7 +29,9 @@ export default function ParticipantCard({
   onClick, 
   selectable = false, 
   showPayButton = false,
-  onPayClick 
+  showRemindButton = false,
+  onPayClick,
+  onRemindClick
 }: ParticipantCardProps) {
   const { name, phone, amountToPay, paymentStatus } = participant;
   const amount = parseFloat(amountToPay || '0');
@@ -55,6 +59,18 @@ export default function ParticipantCard({
             className="bg-primary text-white px-1.5 py-0.5 rounded text-xs"
           >
             Pay
+          </button>
+        )}
+        {showRemindButton && paymentStatus === 'pending' && onRemindClick && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemindClick(participant.id, participant.name);
+            }}
+            className="bg-orange-500 hover:bg-orange-600 text-white px-1.5 py-0.5 rounded text-xs flex items-center gap-1"
+          >
+            <Bell className="w-3 h-3" />
+            Remind
           </button>
         )}
       </div>

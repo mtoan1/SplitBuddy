@@ -54,8 +54,30 @@ export default function BillDetail() {
     }
   });
 
+  const sendIndividualReminderMutation = useMutation({
+    mutationFn: ({ participantId }: { participantId: string }) => 
+      apiRequest('POST', `/api/chillbill/bills/${billId}/participants/${participantId}/send-reminder`, {}),
+    onSuccess: (_, { participantName }) => {
+      toast({
+        title: "Reminder Sent",
+        description: `A payment reminder has been sent to ${participantName}.`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to send reminder. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
   const handlePayClick = (participantId: string) => {
     setLocation(`/payment/${billId}/${participantId}`);
+  };
+
+  const handleRemindClick = (participantId: string, participantName: string) => {
+    sendIndividualReminderMutation.mutate({ participantId, participantName });
   };
 
   // Sort participants: bill owner first, then alphabetical by name
@@ -243,8 +265,8 @@ export default function BillDetail() {
                   <ParticipantCard
                     key={participant.id}
                     participant={participant}
-                    showPayButton={true}
-                    onPayClick={handlePayClick}
+                    showRemindButton={true}
+                    onRemindClick={handleRemindClick}
                   />
                 ))
               )}

@@ -37,6 +37,7 @@ export interface IStorage {
   
   // Notification methods
   sendReminders(billId: string): Promise<any>;
+  sendIndividualReminder(billId: string, participantId: string): Promise<any>;
 }
 
 // In-memory storage implementation
@@ -337,6 +338,30 @@ export class MemoryStorage implements IStorage {
       message: 'Reminders sent',
       count: unpaidParticipants.length,
       participants: unpaidParticipants
+    };
+  }
+
+  async sendIndividualReminder(billId: string, participantId: string): Promise<any> {
+    const participant = await this.getParticipantById(participantId);
+    
+    if (!participant) {
+      throw new Error('Participant not found');
+    }
+
+    // Mock individual notification creation
+    const notification = {
+      billId,
+      participantId: participant.id,
+      type: 'reminder' as const,
+      channel: participant.phone ? 'sms' as const : 'email' as const,
+      status: 'sent' as const,
+      sentAt: new Date()
+    };
+
+    return {
+      message: 'Individual reminder sent',
+      participant: participant,
+      notification: notification
     };
   }
 }
