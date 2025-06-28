@@ -45,7 +45,7 @@ function generateRandomItems(totalAmount: number) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Individual participant reminder - FIXED - moved before other routes to ensure proper matching
+  // Individual participant reminder - FIXED - corrected path to match frontend request
   app.post("/api/chillbill/bills/:billId/participants/:participantId/send-reminder", async (req, res) => {
     try {
       console.log(`Sending reminder for bill ${req.params.billId}, participant ${req.params.participantId}`);
