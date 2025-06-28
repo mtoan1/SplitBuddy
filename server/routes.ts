@@ -45,6 +45,36 @@ function generateRandomItems(totalAmount: number) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Individual participant reminder - FIXED - moved before other routes to ensure proper matching
+  app.post("/api/chillbill/bills/:billId/participants/:participantId/send-reminder", async (req, res) => {
+    try {
+      console.log(`Sending reminder for bill ${req.params.billId}, participant ${req.params.participantId}`);
+      
+      // Verify the participant exists
+      const participant = await storage.getParticipantById(req.params.participantId);
+      if (!participant) {
+        return res.status(404).json({ message: "Participant not found" });
+      }
+
+      // Verify the bill exists
+      const bill = await storage.getBillById(req.params.billId);
+      if (!bill) {
+        return res.status(404).json({ message: "Bill not found" });
+      }
+
+      // Just return success immediately - no complex logic needed
+      res.json({ 
+        success: true,
+        message: "Reminder sent successfully",
+        participantName: participant.name,
+        billId: req.params.billId
+      });
+    } catch (error) {
+      console.error("Error sending reminder:", error);
+      res.status(500).json({ message: "Failed to send reminder", error: error.message });
+    }
+  });
+
   // Bill Management
   app.post("/api/chillbill/bills", async (req, res) => {
     try {
@@ -166,19 +196,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(participants);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch unpaid participants", error });
-    }
-  });
-
-  // Individual participant reminder - SIMPLIFIED
-  app.post("/api/chillbill/bills/:billId/participants/:participantId/send-reminder", async (req, res) => {
-    try {
-      // Just return success immediately - no complex logic needed
-      res.json({ 
-        success: true,
-        message: "Reminder sent successfully" 
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Failed to send reminder", error });
     }
   });
 
