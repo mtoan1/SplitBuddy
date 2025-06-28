@@ -36,11 +36,11 @@ ChillBill Service is a bill-splitting application that allows users to create, m
 ### Backend Architecture
 - **Express REST API**: RESTful endpoints for bill management
 - **TypeScript**: Type-safe server-side development
-- **Drizzle ORM**: Type-safe database operations
-- **Modular Structure**: Separated concerns (routes, storage, database)
+- **In-Memory Storage**: Simple Map-based data storage for development
+- **Modular Structure**: Separated concerns (routes, storage)
 
-### Database Schema
-The application uses PostgreSQL with the following main entities:
+### Data Schema
+The application uses in-memory storage with the following main entities:
 - **Bills**: Core bill splitting requests with metadata
 - **Participants**: Users involved in bill splitting
 - **Payment Requests**: Individual payment obligations
@@ -74,9 +74,7 @@ Key enums define status types:
 - Currently mocked for testing purposes
 
 ### Third-Party Libraries
-- **@neondatabase/serverless**: Serverless PostgreSQL connection
 - **@radix-ui**: Accessible UI primitives
-- **drizzle-orm**: Type-safe database toolkit
 - **qrcode**: QR code generation
 - **wouter**: Lightweight routing
 - **zod**: Runtime type validation
@@ -87,21 +85,22 @@ Key enums define status types:
 - Replit-based development with hot reloading
 - Vite dev server for frontend with proxy configuration
 - tsx for TypeScript execution in development
-- Environment variables for database connections
+- In-memory storage for all data
 
 ### Production Build
 - Vite builds static frontend assets to `dist/public`
 - esbuild bundles backend into `dist/index.js`
 - Single deployment artifact with both frontend and backend
-- PostgreSQL database provisioned separately
+- All data stored in memory (resets on restart)
 
 ### Environment Configuration
 - **Development**: `npm run dev` starts both frontend and backend
 - **Production**: `npm run build` then `npm run start`
-- Database migrations via `npm run db:push`
+- No database setup required
 
 ## Recent Changes
 
+- June 28, 2025: Removed PostgreSQL database dependency and implemented in-memory storage - application now runs without database requirements, data stored in Maps and resets on restart
 - June 27, 2025: Added green checkmark icon for paid participants on selection screen for visual payment status clarity
 - June 27, 2025: Fixed shared link routing to go to participant selection screen (/bills/:id/participants) instead of bill details
 - June 27, 2025: Fixed shared link routing issue - moved /bill/:id route to end to prevent conflicts with more specific routes

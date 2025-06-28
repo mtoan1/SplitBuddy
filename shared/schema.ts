@@ -1,195 +1,166 @@
-import { pgTable, text, serial, uuid, decimal, timestamp, boolean, pgEnum } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const billStatusEnum = pgEnum('bill_status', ['created', 'active', 'completed', 'cancelled']);
-export const splitMethodEnum = pgEnum('split_method', ['equal', 'custom_amount', 'percentage']);
-export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'paid', 'failed', 'overdue']);
-export const notificationTypeEnum = pgEnum('notification_type', ['payment_request', 'reminder', 'completion']);
-export const notificationChannelEnum = pgEnum('notification_channel', ['in_app', 'sms', 'email']);
-export const notificationStatusEnum = pgEnum('notification_status', ['sent', 'delivered', 'failed']);
+// Define enums as string literals instead of PostgreSQL enums
+export const billStatusEnum = ['created', 'active', 'completed', 'cancelled'] as const;
+export const splitMethodEnum = ['equal', 'custom_amount', 'percentage'] as const;
+export const paymentStatusEnum = ['pending', 'paid', 'failed', 'overdue'] as const;
+export const notificationTypeEnum = ['payment_request', 'reminder', 'completion'] as const;
+export const notificationChannelEnum = ['in_app', 'sms', 'email'] as const;
+export const notificationStatusEnum = ['sent', 'delivered', 'failed'] as const;
 
-export const bills = pgTable("bills", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  creatorId: uuid("creator_id").notNull(),
-  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
-  merchantName: text("merchant_name").notNull(),
-  billDate: timestamp("bill_date").notNull(),
-  status: billStatusEnum("status").notNull().default('created'),
-  splitMethod: splitMethodEnum("split_method").default('equal'),
-  aiProcessed: boolean("ai_processed").default(false),
-  billImagePath: text("bill_image_path"),
-  groupImagePath: text("group_image_path"),
-  aiBillId: text("ai_bill_id"),
-  aiGroupId: text("ai_group_id"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export type BillStatus = typeof billStatusEnum[number];
+export type SplitMethod = typeof splitMethodEnum[number];
+export type PaymentStatus = typeof paymentStatusEnum[number];
+export type NotificationType = typeof notificationTypeEnum[number];
+export type NotificationChannel = typeof notificationChannelEnum[number];
+export type NotificationStatus = typeof notificationStatusEnum[number];
+
+// Define data types as TypeScript interfaces
+export interface Bill {
+  id: string;
+  creatorId: string;
+  totalAmount: string;
+  merchantName: string;
+  billDate: Date;
+  status: BillStatus;
+  splitMethod: SplitMethod;
+  aiProcessed: boolean;
+  billImagePath?: string;
+  groupImagePath?: string;
+  aiBillId?: string;
+  aiGroupId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Participant {
+  id: string;
+  billId: string;
+  userId?: string;
+  name: string;
+  phone?: string;
+  email?: string;
+  isCakeUser: boolean;
+  amountToPay: string;
+  percentage?: string;
+  paymentStatus: PaymentStatus;
+  paidAt?: Date;
+  paymentMethod?: string;
+  transactionId?: string;
+  aiFaceId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PaymentRequest {
+  id: string;
+  billId: string;
+  participantId: string;
+  paymentLink: string;
+  qrCodeUrl?: string;
+  expiryDate: Date;
+  status: PaymentStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Notification {
+  id: string;
+  billId: string;
+  participantId?: string;
+  type: NotificationType;
+  channel: NotificationChannel;
+  status: NotificationStatus;
+  sentAt?: Date;
+  deliveredAt?: Date;
+  errorMessage?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface StatusHistory {
+  id: string;
+  billId: string;
+  fromStatus: BillStatus;
+  toStatus: BillStatus;
+  changedBy: string;
+  reason?: string;
+  createdAt: Date;
+}
+
+export interface User {
+  id: number;
+  username: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Define insert schemas using Zod
+export const insertBillSchema = z.object({
+  creatorId: z.string(),
+  totalAmount: z.string(),
+  merchantName: z.string(),
+  billDate: z.coerce.date(),
+  status: z.enum(billStatusEnum).default('created'),
+  splitMethod: z.enum(splitMethodEnum).default('equal'),
+  aiProcessed: z.boolean().default(false),
+  billImagePath: z.string().optional(),
+  groupImagePath: z.string().optional(),
+  aiBillId: z.string().optional(),
+  aiGroupId: z.string().optional(),
 });
 
-export const participants = pgTable("participants", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  billId: uuid("bill_id").notNull().references(() => bills.id, { onDelete: 'cascade' }),
-  userId: uuid("user_id"),
-  name: text("name").notNull(),
-  phone: text("phone"),
-  email: text("email"),
-  isCakeUser: boolean("is_cake_user").default(false),
-  amountToPay: decimal("amount_to_pay", { precision: 10, scale: 2 }).default('0'),
-  percentage: decimal("percentage", { precision: 5, scale: 2 }),
-  paymentStatus: paymentStatusEnum("payment_status").default('pending'),
-  paidAt: timestamp("paid_at"),
-  paymentMethod: text("payment_method"),
-  transactionId: text("transaction_id"),
-  aiFaceId: text("ai_face_id"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const insertParticipantSchema = z.object({
+  billId: z.string(),
+  userId: z.string().optional(),
+  name: z.string(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
+  isCakeUser: z.boolean().default(false),
+  amountToPay: z.string().default('0'),
+  percentage: z.string().optional(),
+  paymentStatus: z.enum(paymentStatusEnum).default('pending'),
+  paidAt: z.coerce.date().optional(),
+  paymentMethod: z.string().optional(),
+  transactionId: z.string().optional(),
+  aiFaceId: z.string().optional(),
 });
 
-export const paymentRequests = pgTable("payment_requests", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  billId: uuid("bill_id").notNull().references(() => bills.id, { onDelete: 'cascade' }),
-  participantId: uuid("participant_id").notNull().references(() => participants.id, { onDelete: 'cascade' }),
-  paymentLink: text("payment_link"),
-  qrCodeUrl: text("qr_code_url"),
-  expiryDate: timestamp("expiry_date"),
-  status: paymentStatusEnum("status").default('pending'),
-  paymentId: text("payment_id"),
-  retryCount: serial("retry_count"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const insertPaymentRequestSchema = z.object({
+  billId: z.string(),
+  participantId: z.string(),
+  paymentLink: z.string(),
+  qrCodeUrl: z.string().optional(),
+  expiryDate: z.coerce.date(),
+  status: z.enum(paymentStatusEnum),
 });
 
-export const notifications = pgTable("notifications", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  billId: uuid("bill_id").notNull().references(() => bills.id, { onDelete: 'cascade' }),
-  participantId: uuid("participant_id").references(() => participants.id, { onDelete: 'cascade' }),
-  type: notificationTypeEnum("type").notNull(),
-  channel: notificationChannelEnum("channel").notNull(),
-  status: notificationStatusEnum("status").default('sent'),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const insertNotificationSchema = z.object({
+  billId: z.string(),
+  participantId: z.string().optional(),
+  type: z.enum(notificationTypeEnum),
+  channel: z.enum(notificationChannelEnum),
+  status: z.enum(notificationStatusEnum),
+  sentAt: z.coerce.date().optional(),
+  deliveredAt: z.coerce.date().optional(),
+  errorMessage: z.string().optional(),
 });
 
-export const statusHistory = pgTable("status_history", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  billId: uuid("bill_id").notNull().references(() => bills.id, { onDelete: 'cascade' }),
-  participantId: uuid("participant_id").references(() => participants.id, { onDelete: 'cascade' }),
-  previousStatus: text("previous_status"),
-  newStatus: text("new_status").notNull(),
-  changedBy: text("changed_by"),
-  reason: text("reason"),
-  createdAt: timestamp("created_at").defaultNow(),
+export const insertStatusHistorySchema = z.object({
+  billId: z.string(),
+  fromStatus: z.enum(billStatusEnum),
+  toStatus: z.enum(billStatusEnum),
+  changedBy: z.string(),
+  reason: z.string().optional(),
 });
 
-// Relations
-export const billsRelations = relations(bills, ({ many }) => ({
-  participants: many(participants),
-  paymentRequests: many(paymentRequests),
-  notifications: many(notifications),
-  statusHistory: many(statusHistory),
-}));
-
-export const participantsRelations = relations(participants, ({ one, many }) => ({
-  bill: one(bills, {
-    fields: [participants.billId],
-    references: [bills.id],
-  }),
-  paymentRequests: many(paymentRequests),
-  notifications: many(notifications),
-  statusHistory: many(statusHistory),
-}));
-
-export const paymentRequestsRelations = relations(paymentRequests, ({ one }) => ({
-  bill: one(bills, {
-    fields: [paymentRequests.billId],
-    references: [bills.id],
-  }),
-  participant: one(participants, {
-    fields: [paymentRequests.participantId],
-    references: [participants.id],
-  }),
-}));
-
-export const notificationsRelations = relations(notifications, ({ one }) => ({
-  bill: one(bills, {
-    fields: [notifications.billId],
-    references: [bills.id],
-  }),
-  participant: one(participants, {
-    fields: [notifications.participantId],
-    references: [participants.id],
-  }),
-}));
-
-export const statusHistoryRelations = relations(statusHistory, ({ one }) => ({
-  bill: one(bills, {
-    fields: [statusHistory.billId],
-    references: [bills.id],
-  }),
-  participant: one(participants, {
-    fields: [statusHistory.participantId],
-    references: [participants.id],
-  }),
-}));
-
-// Insert schemas
-export const insertBillSchema = createInsertSchema(bills).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-}).extend({
-  billDate: z.string().transform((str) => new Date(str)),
-  participantCount: z.number().min(2).max(20).optional()
+export const insertUserSchema = z.object({
+  username: z.string(),
 });
 
-export const insertParticipantSchema = createInsertSchema(participants).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertPaymentRequestSchema = createInsertSchema(paymentRequests).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertNotificationSchema = createInsertSchema(notifications).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertStatusHistorySchema = createInsertSchema(statusHistory).omit({
-  id: true,
-  createdAt: true,
-});
-
-// Types
 export type InsertBill = z.infer<typeof insertBillSchema>;
 export type InsertParticipant = z.infer<typeof insertParticipantSchema>;
 export type InsertPaymentRequest = z.infer<typeof insertPaymentRequestSchema>;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type InsertStatusHistory = z.infer<typeof insertStatusHistorySchema>;
-
-export type Bill = typeof bills.$inferSelect;
-export type Participant = typeof participants.$inferSelect;
-export type PaymentRequest = typeof paymentRequests.$inferSelect;
-export type Notification = typeof notifications.$inferSelect;
-export type StatusHistory = typeof statusHistory.$inferSelect;
-
-// Remove old user schema
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-});
-
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
-
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;

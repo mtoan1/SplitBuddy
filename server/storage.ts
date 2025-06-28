@@ -1,11 +1,8 @@
 import { 
-  users, bills, participants, paymentRequests, notifications, statusHistory,
   type User, type InsertUser, type Bill, type InsertBill, 
   type Participant, type InsertParticipant, type PaymentRequest, type InsertPaymentRequest,
   type Notification, type InsertNotification, type StatusHistory, type InsertStatusHistory
 } from "@shared/schema";
-import { db } from "./db";
-import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
@@ -42,107 +39,188 @@ export interface IStorage {
   sendReminders(billId: string): Promise<any>;
 }
 
-export class DatabaseStorage implements IStorage {
+// In-memory storage implementation
+export class MemoryStorage implements IStorage {
+  private users: Map<number, User> = new Map();
+  private bills: Map<string, Bill> = new Map();
+  private participants: Map<string, Participant> = new Map();
+  private paymentRequests: Map<string, PaymentRequest> = new Map();
+  private notifications: Map<string, Notification> = new Map();
+  private statusHistory: Map<string, StatusHistory> = new Map();
+  
+  private nextUserId = 1;
+
+  private generateId(): string {
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
+    return this.users.get(id);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
+    for (const user of Array.from(this.users.values())) {
+      if (user.username === username) {
+        return user;
+      }
+    }
+    return undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
+    const id = this.nextUserId++;
+    const now = new Date();
+    const user: User = {
+      id,
+      username: insertUser.username,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.users.set(id, user);
     return user;
   }
 
   async createBill(insertBill: InsertBill): Promise<Bill> {
-    const [bill] = await db
-      .insert(bills)
-      .values(insertBill)
-      .returning();
+    const id = this.generateId();
+    const now = new Date();
+    const bill: Bill = {
+      id,
+      creatorId: insertBill.creatorId,
+      totalAmount: insertBill.totalAmount,
+      merchantName: insertBill.merchantName,
+      billDate: insertBill.billDate,
+      status: insertBill.status || 'created',
+      splitMethod: insertBill.splitMethod || 'equal',
+      aiProcessed: insertBill.aiProcessed || false,
+      billImagePath: insertBill.billImagePath,
+      groupImagePath: insertBill.groupImagePath,
+      aiBillId: insertBill.aiBillId,
+      aiGroupId: insertBill.aiGroupId,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.bills.set(id, bill);
     return bill;
   }
 
   async getBillById(id: string): Promise<Bill | undefined> {
-    const [bill] = await db.select().from(bills).where(eq(bills.id, id));
-    return bill || undefined;
+    return this.bills.get(id);
   }
 
   async getBillsByCreator(creatorId: string): Promise<Bill[]> {
-    return await db.select().from(bills).where(eq(bills.creatorId, creatorId));
+    const bills = [];
+    for (const bill of Array.from(this.bills.values())) {
+      if (bill.creatorId === creatorId) {
+        bills.push(bill);
+      }
+    }
+    // Sort by creation date (newest first)
+    return bills.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
   async updateBill(id: string, updates: Partial<Bill>): Promise<Bill | undefined> {
-    const [bill] = await db
-      .update(bills)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(bills.id, id))
-      .returning();
-    return bill || undefined;
+    const bill = this.bills.get(id);
+    if (!bill) return undefined;
+    
+    const updatedBill = {
+      ...bill,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.bills.set(id, updatedBill);
+    return updatedBill;
   }
 
   async deleteBill(id: string): Promise<void> {
-    await db.delete(bills).where(eq(bills.id, id));
+    this.bills.delete(id);
+    // Also delete associated participants
+    for (const [participantId, participant] of Array.from(this.participants.entries())) {
+      if (participant.billId === id) {
+        this.participants.delete(participantId);
+      }
+    }
   }
 
   async createParticipant(insertParticipant: InsertParticipant): Promise<Participant> {
-    const [participant] = await db
-      .insert(participants)
-      .values(insertParticipant)
-      .returning();
+    const id = this.generateId();
+    const now = new Date();
+    const participant: Participant = {
+      id,
+      billId: insertParticipant.billId,
+      userId: insertParticipant.userId,
+      name: insertParticipant.name,
+      phone: insertParticipant.phone,
+      email: insertParticipant.email,
+      isCakeUser: insertParticipant.isCakeUser || false,
+      amountToPay: insertParticipant.amountToPay || '0',
+      percentage: insertParticipant.percentage,
+      paymentStatus: insertParticipant.paymentStatus || 'pending',
+      paidAt: insertParticipant.paidAt,
+      paymentMethod: insertParticipant.paymentMethod,
+      transactionId: insertParticipant.transactionId,
+      aiFaceId: insertParticipant.aiFaceId,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.participants.set(id, participant);
     return participant;
   }
 
   async getParticipantsByBillId(billId: string): Promise<Participant[]> {
-    return await db.select().from(participants).where(eq(participants.billId, billId));
+    const participants = [];
+    for (const participant of Array.from(this.participants.values())) {
+      if (participant.billId === billId) {
+        participants.push(participant);
+      }
+    }
+    return participants;
   }
 
   async getParticipantById(id: string): Promise<Participant | undefined> {
-    const [participant] = await db.select().from(participants).where(eq(participants.id, id));
-    return participant || undefined;
+    return this.participants.get(id);
   }
 
   async getUnpaidParticipants(billId: string): Promise<Participant[]> {
-    return await db.select().from(participants).where(
-      and(
-        eq(participants.billId, billId),
-        eq(participants.paymentStatus, 'pending')
-      )
-    );
+    const participants = [];
+    for (const participant of Array.from(this.participants.values())) {
+      if (participant.billId === billId && participant.paymentStatus === 'pending') {
+        participants.push(participant);
+      }
+    }
+    return participants;
   }
 
   async updateParticipant(id: string, updates: Partial<Participant>): Promise<Participant | undefined> {
-    const [participant] = await db
-      .update(participants)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(participants.id, id))
-      .returning();
-    return participant || undefined;
+    const participant = this.participants.get(id);
+    if (!participant) return undefined;
+    
+    const updatedParticipant = {
+      ...participant,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.participants.set(id, updatedParticipant);
+    return updatedParticipant;
   }
 
   async deleteParticipant(id: string): Promise<void> {
-    await db.delete(participants).where(eq(participants.id, id));
+    this.participants.delete(id);
   }
 
   async markParticipantAsPaid(id: string, paymentMethod: string = 'mock'): Promise<Participant | undefined> {
-    const [participant] = await db
-      .update(participants)
-      .set({ 
-        paymentStatus: 'paid',
-        paidAt: new Date(),
-        paymentMethod,
-        transactionId: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        updatedAt: new Date()
-      })
-      .where(eq(participants.id, id))
-      .returning();
-    return participant || undefined;
+    const participant = this.participants.get(id);
+    if (!participant) return undefined;
+    
+    const updatedParticipant = {
+      ...participant,
+      paymentStatus: 'paid' as const,
+      paidAt: new Date(),
+      paymentMethod,
+      transactionId: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      updatedAt: new Date(),
+    };
+    this.participants.set(id, updatedParticipant);
+    return updatedParticipant;
   }
 
   async calculateBillSplit(billId: string, splitMethod: string, customAmounts?: Record<string, number>, percentages?: Record<string, number>): Promise<any> {
@@ -227,16 +305,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async requestPaymentForParticipant(billId: string, participantId: string): Promise<any> {
-    const participant = await db.select().from(participants).where(eq(participants.id, participantId));
+    const participant = await this.getParticipantById(participantId);
     
-    if (participant.length === 0) {
+    if (!participant) {
       throw new Error('Participant not found');
     }
 
     return {
       message: 'Payment request sent',
       paymentLink: `https://pay.chillbill.app/bill/${billId}/participant/${participantId}`,
-      participant: participant[0]
+      participant: participant
     };
   }
 
@@ -263,4 +341,4 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemoryStorage();

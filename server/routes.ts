@@ -2,9 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertBillSchema, insertParticipantSchema, participants } from "@shared/schema";
-import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { insertBillSchema, insertParticipantSchema } from "@shared/schema";
 import QRCode from "qrcode";
 
 // Helper function to generate random menu items
@@ -415,7 +413,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           billId: req.params.billId,
           name: participant.name,
           aiFaceId: participant.faceId,
-          paymentStatus: 'pending'
+          paymentStatus: 'pending',
+          isCakeUser: false,
+          amountToPay: '0'
         });
       }
 
@@ -478,7 +478,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           billId: req.params.billId,
           name: participant.name,
           aiFaceId: participant.faceId,
-          paymentStatus: 'pending'
+          paymentStatus: 'pending',
+          isCakeUser: false,
+          amountToPay: '0'
         });
       }
 
