@@ -82,8 +82,10 @@ export default function BillDetail() {
   };
 
   // Separate bill owner from other participants
-  const billOwner = participants?.find(p => p.name === bill?.createdBy);
-  const otherParticipants = participants?.filter(p => p.name !== bill?.createdBy)
+  // Since we don't have a direct way to identify the owner, we'll use the first participant (index 0) as the owner
+  // This matches the logic used when creating participants where the first one is marked as paid (owner)
+  const billOwner = participants?.find(p => p.paymentStatus === 'paid') || participants?.[0];
+  const otherParticipants = participants?.filter(p => p.id !== billOwner?.id)
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const handleShare = async () => {
