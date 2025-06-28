@@ -31,6 +31,10 @@ export default function ManualParticipants() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
+  // Track which participants have been manually edited
+  const [manuallyEditedParticipants, setManuallyEditedParticipants] = useState<Set<number>>(new Set());
+  const [originalAmounts, setOriginalAmounts] = useState<string[]>([]);
+
   // Query for existing participants
   const participantsQuery = useQuery({
     queryKey: ['/api/chillbill/bills', billId, 'participants'],
@@ -65,6 +69,11 @@ export default function ManualParticipants() {
         amountToPay: p.amountToPay.toString()
       }));
       form.reset({ participants: participantData });
+      
+      // Store original amounts to track manual edits
+      const amounts = participantData.map(p => p.amountToPay);
+      setOriginalAmounts(amounts);
+      setManuallyEditedParticipants(new Set()); // Reset manual edit tracking
     }
   }, [participantsQuery.data, form]);
 
@@ -109,13 +118,17 @@ export default function ManualParticipants() {
     
     form.setValue('participants', updatedParticipants);
     
+    // Reset manual edit tracking since we're doing a fresh equal split
+    setManuallyEditedParticipants(new Set());
+    setOriginalAmounts(updatedParticipants.map(p => p.amountToPay));
+    
     toast({
       title: "Amounts Split Equally",
       description: `${formatCurrency(billTotal)} split equally among ${participantCount} participants.`,
     });
   };
 
-  // Redistribute remaining amount among all participants
+  // Redistribute remaining amount only among participants that haven't been manually edited
   const redistributeRemaining = () => {
     const participantCount = currentParticipants.length;
     
@@ -135,28 +148,64 @@ export default function ManualParticipants() {
       });
       return;
     }
+
+    // Find participants that haven't been manually edited
+    const unEditedIndices = [];
+    for (let i = 0; i < participantCount; i++) {
+      if (!manuallyEditedParticipants.has(i)) {
+        unEditedIndices.push(i);
+      }
+    }
+
+    if (unEditedIndices.length === 0) {
+      toast({
+        title: "All Amounts Manually Set",
+        description: "All participants have manually edited amounts. Use 'Equal Split' to reset and redistribute.",
+        variant: "destructive",
+      });
+      return;
+    }
     
-    // Distribute the remaining amount equally among all participants
-    const adjustmentPerPerson = Math.floor((remaining / participantCount) * 100) / 100;
-    const redistributionRemainder = Math.round((remaining - (adjustmentPerPerson * participantCount)) * 100) / 100;
+    // Distribute the remaining amount only among unedited participants
+    const adjustmentPerPerson = Math.floor((remaining / unEditedIndices.length) * 100) / 100;
+    const redistributionRemainder = Math.round((remaining - (adjustmentPerPerson * unEditedIndices.length)) * 100) / 100;
     
     const updatedParticipants = currentParticipants.map((participant, index) => {
-      const currentAmount = parseFloat(participant.amountToPay) || 0;
-      const adjustment = index === 0 ? adjustmentPerPerson + redistributionRemainder : adjustmentPerPerson;
-      const newAmount = currentAmount + adjustment;
+      // Only adjust amounts for participants that haven't been manually edited
+      if (unEditedIndices.includes(index)) {
+        const currentAmount = parseFloat(participant.amountToPay) || 0;
+        // Give the remainder to the first unedited participant
+        const adjustment = index === unEditedIndices[0] ? adjustmentPerPerson + redistributionRemainder : adjustmentPerPerson;
+        const newAmount = currentAmount + adjustment;
+        
+        return {
+          ...participant,
+          amountToPay: Math.max(0, newAmount).toFixed(2) // Ensure no negative amounts
+        };
+      }
       
-      return {
-        ...participant,
-        amountToPay: Math.max(0, newAmount).toFixed(2) // Ensure no negative amounts
-      };
+      // Keep manually edited amounts unchanged
+      return participant;
     });
     
     form.setValue('participants', updatedParticipants);
     
     toast({
       title: "Amounts Redistributed",
-      description: `${formatCurrency(Math.abs(remaining))} has been ${remaining > 0 ? 'distributed among' : 'deducted from'} all participants.`,
+      description: `${formatCurrency(Math.abs(remaining))} redistributed among ${unEditedIndices.length} unedited participants. ${manuallyEditedParticipants.size} manually edited amounts preserved.`,
     });
+  };
+
+  // Track manual edits to participant amounts
+  const handleAmountChange = (index: number, newValue: string) => {
+    // Mark this participant as manually edited
+    setManuallyEditedParticipants(prev => new Set(prev).add(index));
+    
+    // Validate the amount
+    if (validateAmount(newValue, index)) {
+      // Update the form value
+      form.setValue(`participants.${index}.amountToPay`, newValue);
+    }
   };
 
   // Validate individual amount doesn't exceed total
@@ -265,6 +314,10 @@ export default function ManualParticipants() {
     );
   }
 
+  // Count manually edited vs unedited participants for better UX
+  const unEditedCount = currentParticipants.length - manuallyEditedParticipants.size;
+  const canRedistribute = unEditedCount > 0 && !isBalanced;
+
   return (
     <div className="max-w-md mx-auto bg-gradient-to-br from-white to-gray-50 min-h-screen">
       <div className="p-5 space-y-4">
@@ -331,6 +384,16 @@ export default function ManualParticipants() {
                   {formatCurrency(remaining)}
                 </span>
               </div>
+              
+              {/* Show edit status */}
+              {manuallyEditedParticipants.size > 0 && (
+                <div className="flex justify-between text-xs pt-1 border-t">
+                  <span>Manual edits:</span>
+                  <span className="font-medium text-blue-600">
+                    {manuallyEditedParticipants.size} of {currentParticipants.length}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -357,7 +420,12 @@ export default function ManualParticipants() {
                   size="sm"
                   onClick={redistributeRemaining}
                   className="text-xs h-6 px-2 bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
-                  disabled={fields.length === 0 || isBalanced}
+                  disabled={!canRedistribute}
+                  title={
+                    unEditedCount === 0 ? "All amounts manually edited" :
+                    isBalanced ? "Already balanced" :
+                    `Redistribute among ${unEditedCount} unedited participants`
+                  }
                 >
                   Redistribute
                 </Button>
@@ -377,26 +445,52 @@ export default function ManualParticipants() {
             <div className="space-y-3">
               {fields.map((field, index) => {
                 const isOwner = index === 0;
+                const isManuallyEdited = manuallyEditedParticipants.has(index);
+                
                 return (
-                  <div key={field.id} className="p-3 border border-gray-200 rounded-lg space-y-2 relative">
+                  <div key={field.id} className={`p-3 border rounded-lg space-y-2 relative ${
+                    isManuallyEdited ? 'border-blue-300 bg-blue-50/30' : 'border-gray-200'
+                  }`}>
                     {fields.length > 1 && (
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => remove(index)}
+                        onClick={() => {
+                          remove(index);
+                          // Update manual edit tracking when removing participants
+                          const newEditedSet = new Set(manuallyEditedParticipants);
+                          newEditedSet.delete(index);
+                          // Shift indices down for participants after the removed one
+                          const shiftedSet = new Set<number>();
+                          newEditedSet.forEach(editedIndex => {
+                            if (editedIndex < index) {
+                              shiftedSet.add(editedIndex);
+                            } else if (editedIndex > index) {
+                              shiftedSet.add(editedIndex - 1);
+                            }
+                          });
+                          setManuallyEditedParticipants(shiftedSet);
+                        }}
                         className="absolute top-1 right-1 text-red-500 hover:text-red-700 p-1 h-6 w-6"
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     )}
                     
-                    {isOwner && (
-                      <Badge variant="secondary" className="text-xs h-5">
-                        <Crown className="w-3 h-3 mr-1" />
-                        Owner
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {isOwner && (
+                        <Badge variant="secondary" className="text-xs h-5">
+                          <Crown className="w-3 h-3 mr-1" />
+                          Owner
+                        </Badge>
+                      )}
+                      {isManuallyEdited && (
+                        <Badge variant="outline" className="text-xs h-5 border-blue-300 text-blue-700">
+                          Edited
+                        </Badge>
+                      )}
+                    </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div>
@@ -417,15 +511,11 @@ export default function ManualParticipants() {
                           min="0"
                           max={billTotal}
                           placeholder="0.00"
-                          className={`h-8 text-sm ${isOwner ? 'font-bold text-primary' : ''}`}
+                          className={`h-8 text-sm ${isOwner ? 'font-bold text-primary' : ''} ${
+                            isManuallyEdited ? 'border-blue-300 bg-blue-50' : ''
+                          }`}
                           onChange={(e) => {
-                            const value = e.target.value;
-                            if (validateAmount(value, index)) {
-                              form.register(`participants.${index}.amountToPay`).onChange(e);
-                            } else {
-                              // Reset to previous valid value
-                              e.target.value = form.getValues(`participants.${index}.amountToPay`);
-                            }
+                            handleAmountChange(index, e.target.value);
                           }}
                         />
                       </div>
@@ -472,7 +562,13 @@ export default function ManualParticipants() {
                 <p className={`text-xs ${
                   remaining > 0 ? 'text-orange-700' : 'text-red-700'
                 }`}>
-                  Use "Equal Split" to distribute evenly or "Redistribute" to balance the current amounts.
+                  {canRedistribute ? (
+                    `Use "Redistribute" to balance among ${unEditedCount} unedited participants, or "Equal Split" to reset all amounts.`
+                  ) : manuallyEditedParticipants.size === currentParticipants.length ? (
+                    'All amounts have been manually edited. Use "Equal Split" to reset and redistribute evenly.'
+                  ) : (
+                    'Use "Equal Split" to distribute evenly among all participants.'
+                  )}
                 </p>
               </div>
             )}
