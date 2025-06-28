@@ -56,3 +56,8 @@ export function calculateTotalPaid(participants: any[]): number {
     .filter(p => p.paymentStatus === 'paid')
     .reduce((sum, p) => sum + parseFloat(p.amountToPay || '0'), 0);
 }
+
+// Helper function to format VND amounts with commas (for display without currency symbol)
+export function formatVNDWithCommas(amount: number): string {
+  return new Intl.NumberFormat('vi-VN').format(Math.round(amount));
+}

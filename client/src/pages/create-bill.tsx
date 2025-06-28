@@ -13,6 +13,7 @@ import { insertBillSchema } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { formatVNDWithCommas } from "@/lib/utils";
 import AIProcessingModal from "@/components/ai-processing-modal";
 
 const createBillFormSchema = insertBillSchema.extend({
@@ -150,7 +151,7 @@ export default function CreateBill() {
     
     toast({
       title: "Receipt Processed",
-      description: `${randomBusiness} - ${randomAmount.toLocaleString('vi-VN')} VND auto-filled`,
+      description: `${randomBusiness} - ${formatVNDWithCommas(randomAmount)} VND auto-filled`,
     });
   };
 
