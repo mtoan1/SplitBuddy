@@ -83,6 +83,29 @@ export default function BillDetail() {
   };
 
   const handleRemindClick = (participantId: string, participantName: string) => {
+    // Validate that both billId and participantId are valid before making the API call
+    if (!billId || !participantId) {
+      console.error('Invalid parameters for reminder:', { billId, participantId });
+      toast({
+        title: "Error",
+        description: "Unable to send reminder. Invalid bill or participant information.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Additional validation to ensure they are non-empty strings
+    if (typeof billId !== 'string' || typeof participantId !== 'string' || 
+        billId.trim() === '' || participantId.trim() === '') {
+      console.error('Empty parameters for reminder:', { billId, participantId });
+      toast({
+        title: "Error",
+        description: "Unable to send reminder. Missing bill or participant information.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     console.log('Sending reminder to participant:', participantId, participantName);
     sendIndividualReminderMutation.mutate(participantId);
   };
