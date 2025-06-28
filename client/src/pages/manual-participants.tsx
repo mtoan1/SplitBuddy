@@ -2,12 +2,9 @@ import { useState, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { FormattedNumberInput } from "@/components/ui/formatted-number-input";
-import { ArrowLeft, Plus, Trash2, Users, Crown, AlertTriangle, CheckCircle, Calculator, Shuffle, UserPlus, Phone, DollarSign, Zap, Target, RotateCcw } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Users, Crown, AlertTriangle, CheckCircle, Calculator, Target, RotateCcw, UserPlus, Zap } from "lucide-react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertParticipantSchema } from "@shared/schema";
@@ -321,7 +318,7 @@ export default function ManualParticipants() {
 
   return (
     <div className="mobile-container">
-      {/* Compact Header */}
+      {/* Minimal Header */}
       <header className="mobile-header">
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -338,121 +335,105 @@ export default function ManualParticipants() {
               alt="Cake Logo"
               className="w-8 h-8 rounded-lg object-contain"
             />
-            <div>
-              <h1 className="text-lg font-bold text-gray-900 dark:text-white">Review Participants</h1>
-            </div>
+            <h1 className="text-lg font-bold text-gray-900 dark:text-white">Split Bill</h1>
           </div>
         </div>
       </header>
 
       <div className="px-4 py-3 space-y-4">
-        {/* Modern Bill Summary */}
-        <div className="bg-gradient-to-br from-primary/8 via-primary/5 to-transparent rounded-2xl p-5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-16 translate-x-16"></div>
-          <div className="relative">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="font-bold text-gray-900 dark:text-white text-lg">{billQuery.data.merchantName}</h3>
-                <p className="text-sm text-gray-500">{new Date(billQuery.data.billDate).toLocaleDateString()}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-primary">{formatCurrency(billTotalVND)}</p>
-                <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                  isBalanced ? 'bg-green-100 text-green-700' : 
-                  remaining > 0 ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'
-                }`}>
-                  {isBalanced ? (
-                    <>
-                      <CheckCircle className="w-3 h-3" />
-                      Balanced
-                    </>
-                  ) : (
-                    <>
-                      <AlertTriangle className="w-3 h-3" />
-                      {remaining > 0 ? '+' : ''}{formatCurrency(remaining)}
-                    </>
-                  )}
-                </div>
+        {/* Compact Bill Summary */}
+        <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-2xl p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-gray-900 dark:text-white">{billQuery.data.merchantName}</h3>
+              <p className="text-sm text-gray-500">{new Date(billQuery.data.billDate).toLocaleDateString()}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xl font-bold text-primary">{formatCurrency(billTotalVND)}</p>
+              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                isBalanced ? 'bg-green-100 text-green-700' : 
+                remaining > 0 ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'
+              }`}>
+                {isBalanced ? (
+                  <>
+                    <CheckCircle className="w-3 h-3" />
+                    Balanced
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle className="w-3 h-3" />
+                    {remaining > 0 ? '+' : ''}{formatCurrency(remaining)}
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Modern Smart Actions Panel */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <Zap className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold text-gray-900">Smart Split Tools</span>
-          </div>
+        {/* Compact Action Bar */}
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={autoSplitAmounts}
+            disabled={fields.length === 0}
+            className="flex-1 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 rounded-xl py-2"
+          >
+            <Target className="w-4 h-4 mr-1" />
+            Equal
+          </Button>
           
-          <div className="grid grid-cols-2 gap-2 mb-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={autoSplitAmounts}
-              disabled={fields.length === 0}
-              className="flex items-center gap-2 py-3 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 rounded-xl"
-            >
-              <Target className="w-4 h-4" />
-              <span className="text-sm font-medium">Equal Split</span>
-            </Button>
-            
-            <Button
-              type="button"
-              variant="outline"
-              onClick={redistributeRemaining}
-              disabled={!canRedistribute}
-              className="flex items-center gap-2 py-3 bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100 rounded-xl disabled:opacity-50"
-            >
-              <Calculator className="w-4 h-4" />
-              <span className="text-sm font-medium">Redistribute</span>
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={redistributeRemaining}
+            disabled={!canRedistribute}
+            className="flex-1 bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100 rounded-xl py-2 disabled:opacity-50"
+          >
+            <Calculator className="w-4 h-4 mr-1" />
+            Redistribute
+          </Button>
 
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={resetAllAmounts}
-              disabled={fields.length === 0}
-              className="flex items-center gap-2 py-2 bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100 rounded-xl"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span className="text-xs font-medium">Reset All</span>
-            </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={resetAllAmounts}
+            disabled={fields.length === 0}
+            className="bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100 rounded-xl px-3 py-2"
+          >
+            <RotateCcw className="w-4 h-4" />
+          </Button>
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => append({ name: '', phone: '', amountToPay: '0' })}
-              className="flex items-center gap-2 py-2 bg-green-50 border-green-200 text-green-700 hover:bg-green-100 rounded-xl"
-            >
-              <UserPlus className="w-3 h-3" />
-              <span className="text-xs font-medium">Add Person</span>
-            </Button>
-          </div>
-
-          {/* Smart Insights */}
-          {unEditedCount > 0 && !isBalanced && (
-            <div className="mt-3 p-3 bg-blue-50 rounded-xl">
-              <p className="text-xs text-blue-700">
-                💡 <strong>{unEditedCount} unedited participants</strong> can auto-adjust to balance the bill
-              </p>
-            </div>
-          )}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => append({ name: '', phone: '', amountToPay: '0' })}
+            className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 rounded-xl px-3 py-2"
+          >
+            <UserPlus className="w-4 h-4" />
+          </Button>
         </div>
 
-        {/* Modern Participants Form */}
+        {/* Smart Insight */}
+        {unEditedCount > 0 && !isBalanced && (
+          <div className="bg-blue-50 rounded-xl p-3">
+            <p className="text-xs text-blue-700">
+              💡 <strong>{unEditedCount} participants</strong> can auto-adjust to balance
+            </p>
+          </div>
+        )}
+
+        {/* Participants Form */}
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-          <div className="space-y-3">
+          <div className="space-y-2">
             {fields.map((field, index) => {
               const isOwner = index === 0;
               const isManuallyEdited = manuallyEditedParticipants.has(index);
               
               return (
-                <div key={field.id} className={`relative rounded-2xl p-4 transition-all ${
-                  isManuallyEdited ? 'bg-blue-50 shadow-sm ring-1 ring-blue-200' : 'bg-white shadow-sm'
-                } ${isOwner ? 'ring-1 ring-yellow-300 bg-yellow-50' : ''}`}>
+                <div key={field.id} className={`relative rounded-xl p-3 transition-all ${
+                  isManuallyEdited ? 'bg-blue-50 ring-1 ring-blue-200' : 'bg-white'
+                } ${isOwner ? 'ring-1 ring-yellow-300 bg-yellow-50' : ''} shadow-sm`}>
                   
                   {/* Remove Button */}
                   {fields.length > 1 && (
@@ -474,67 +455,55 @@ export default function ManualParticipants() {
                         });
                         setManuallyEditedParticipants(shiftedSet);
                       }}
-                      className="absolute top-2 right-2 text-red-500 hover:text-red-700 w-6 h-6 p-0 hover:bg-red-100 rounded-full"
+                      className="absolute top-1 right-1 text-red-500 hover:text-red-700 w-6 h-6 p-0 hover:bg-red-100 rounded-full"
                     >
                       <Trash2 className="w-3 h-3" />
                     </Button>
                   )}
                   
-                  {/* Status Badges */}
-                  <div className="flex items-center gap-2 mb-3">
+                  {/* Status Indicators */}
+                  <div className="flex items-center gap-2 mb-2">
                     {isOwner && (
-                      <div className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                      <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
                         <Crown className="w-3 h-3" />
-                        Bill Owner
+                        Owner
                       </div>
                     )}
                     {isManuallyEdited && (
-                      <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                      <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                         <Zap className="w-3 h-3" />
-                        Custom Amount
+                        Custom
                       </div>
                     )}
                   </div>
 
-                  {/* Modern Form Grid */}
-                  <div className="grid grid-cols-12 gap-3 items-end">
-                    {/* Name - 5 columns */}
-                    <div className="col-span-5">
-                      <Label className="text-xs font-medium text-gray-700 flex items-center gap-1 mb-1">
-                        <Users className="w-3 h-3" />
-                        Full Name
-                      </Label>
+                  {/* Optimized Form Layout */}
+                  <div className="grid grid-cols-12 gap-2 items-center">
+                    {/* Name - 4 columns */}
+                    <div className="col-span-4">
                       <Input
                         {...form.register(`participants.${index}.name`)}
-                        placeholder="Enter name"
-                        className="h-9 text-sm bg-white rounded-xl border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
+                        placeholder="Full name"
+                        className="h-8 text-sm bg-white rounded-lg border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
                       />
                     </div>
 
-                    {/* Phone - 4 columns */}
-                    <div className="col-span-4">
-                      <Label className="text-xs font-medium text-gray-700 flex items-center gap-1 mb-1">
-                        <Phone className="w-3 h-3" />
-                        Phone
-                      </Label>
+                    {/* Phone - 3 columns */}
+                    <div className="col-span-3">
                       <Input
                         {...form.register(`participants.${index}.phone`)}
-                        placeholder="+84 xxx xxx"
-                        className="h-9 text-sm bg-white rounded-xl border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
+                        placeholder="+84 xxx"
+                        className="h-8 text-sm bg-white rounded-lg border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
                       />
                     </div>
 
-                    {/* Amount - 3 columns */}
-                    <div className="col-span-3">
-                      <Label className="text-xs font-medium text-gray-700 flex items-center gap-1 mb-1">
-                        <DollarSign className="w-3 h-3" />
-                        Amount
-                      </Label>
+                    {/* Amount - 5 columns (wider as requested) */}
+                    <div className="col-span-5">
                       <FormattedNumberInput
                         value={form.watch(`participants.${index}.amountToPay`) || ''}
                         onChange={(value) => handleAmountChange(index, value)}
                         placeholder="0"
-                        className={`h-9 text-sm font-semibold rounded-xl border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary ${
+                        className={`h-8 text-sm font-semibold rounded-lg border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary ${
                           isOwner ? 'text-primary bg-primary/5' : 'text-gray-900 bg-white'
                         } ${isManuallyEdited ? 'border-blue-300 bg-blue-50' : ''}`}
                       />
@@ -544,13 +513,13 @@ export default function ManualParticipants() {
               );
             })}
 
-            {/* Modern Empty State */}
+            {/* Empty State */}
             {fields.length === 0 && (
-              <div className="text-center py-12 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-8 h-8 text-primary" />
+              <div className="text-center py-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl">
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Users className="w-6 h-6 text-primary" />
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">No Participants Yet</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">No Participants</h4>
                 <p className="text-sm text-gray-600 mb-4">Add people to split this bill</p>
                 <Button
                   type="button"
@@ -565,48 +534,44 @@ export default function ManualParticipants() {
             )}
           </div>
 
-          {/* Modern Action Button */}
-          <div className="pt-4">
+          {/* Action Button */}
+          <div className="pt-2">
             <Button
               type="submit"
-              className="w-full bg-primary text-white py-4 font-semibold hover:bg-primary/90 rounded-2xl shadow-lg"
+              className="w-full bg-primary text-white py-3 font-semibold hover:bg-primary/90 rounded-xl shadow-lg"
               disabled={createParticipantsMutation.isPending || !isBalanced || fields.length === 0}
             >
               {createParticipantsMutation.isPending ? (
                 <div className="flex items-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  Saving Changes...
+                  Saving...
                 </div>
               ) : (
                 'Continue to Bill Details'
               )}
             </Button>
             
-            {/* Modern Balance Status */}
+            {/* Balance Status */}
             {!isBalanced && fields.length > 0 && (
-              <div className={`mt-4 p-4 rounded-2xl ${
+              <div className={`mt-3 p-3 rounded-xl ${
                 remaining > 0 ? 'bg-orange-50' : 'bg-red-50'
               }`}>
-                <div className="flex items-start gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    remaining > 0 ? 'bg-orange-100' : 'bg-red-100'
-                  }`}>
-                    <AlertTriangle className={`w-4 h-4 ${
-                      remaining > 0 ? 'text-orange-600' : 'text-red-600'
-                    }`} />
-                  </div>
-                  <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className={`w-4 h-4 ${
+                    remaining > 0 ? 'text-orange-600' : 'text-red-600'
+                  }`} />
+                  <div>
                     <p className={`text-sm font-semibold ${
                       remaining > 0 ? 'text-orange-800' : 'text-red-800'
                     }`}>
                       {remaining > 0 ? 'Under-allocated' : 'Over-allocated'} by {formatCurrency(Math.abs(remaining))}
                     </p>
-                    <p className={`text-xs mt-1 ${
+                    <p className={`text-xs ${
                       remaining > 0 ? 'text-orange-700' : 'text-red-700'
                     }`}>
                       {canRedistribute ? 
                         `Use "Redistribute" to balance among ${unEditedCount} unedited participants.` :
-                        'Use "Equal Split" to reset and redistribute evenly.'
+                        'Use "Equal" to reset and redistribute evenly.'
                       }
                     </p>
                   </div>
