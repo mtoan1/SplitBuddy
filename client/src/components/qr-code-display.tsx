@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { QrCode, Share2, Copy, Download, ExternalLink, Link, CheckCircle } from "lucide-react";
+import { Share2, Copy, Download, ExternalLink, Link, CheckCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
@@ -95,7 +95,6 @@ export default function QRCodeDisplay({ billId }: QRCodeDisplayProps) {
     return (
       <div className="w-full py-8">
         <div className="text-center">
-          <QrCode className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <p className="text-red-600 dark:text-red-400 mb-4 font-medium">Failed to generate QR code</p>
           <Button 
             onClick={() => qrQuery.refetch()}
@@ -112,21 +111,14 @@ export default function QRCodeDisplay({ billId }: QRCodeDisplayProps) {
 
   return (
     <div className="w-full space-y-8">
-      {/* Section Header */}
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <QrCode className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Bill Sharing
-          </h3>
-        </div>
-        <div className="flex items-center justify-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-          <span className="font-medium">{qrData.billName}</span>
-          <span>•</span>
-          <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
-            {formatCurrency(parseFloat(qrData.totalAmount))}
-          </Badge>
-        </div>
+      {/* Bill Name at Top */}
+      <div className="text-center">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+          {qrData.billName}
+        </h3>
+        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-base px-4 py-1">
+          {formatCurrency(parseFloat(qrData.totalAmount))}
+        </Badge>
       </div>
 
       {/* QR Code Section */}
@@ -137,11 +129,6 @@ export default function QRCodeDisplay({ billId }: QRCodeDisplayProps) {
             alt={`QR Code for ${qrData.billName}`}
             className="w-40 h-40 object-contain"
           />
-        </div>
-        <div className="text-center">
-          <p className="text-sm font-medium text-gray-900 dark:text-white">
-            Scan with any camera app
-          </p>
         </div>
       </div>
 
