@@ -113,12 +113,9 @@ export default function QRCodeDisplay({ billId }: QRCodeDisplayProps) {
     <div className="w-full space-y-8">
       {/* Bill Name at Top */}
       <div className="text-center">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white">
           {qrData.billName}
         </h3>
-        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-base px-4 py-1">
-          {formatCurrency(parseFloat(qrData.totalAmount))}
-        </Badge>
       </div>
 
       {/* QR Code Section */}
