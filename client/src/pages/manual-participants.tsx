@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { FormattedNumberInput } from "@/components/ui/formatted-number-input";
 import { ArrowLeft, Plus, Trash2, Users, Crown, AlertTriangle, CheckCircle, Calculator, Shuffle, UserPlus, Phone, DollarSign } from "lucide-react";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -35,7 +34,6 @@ export default function ManualParticipants() {
 
   // Track which participants have been manually edited
   const [manuallyEditedParticipants, setManuallyEditedParticipants] = useState<Set<number>>(new Set());
-  const [originalAmounts, setOriginalAmounts] = useState<string[]>([]);
 
   // Query for existing participants
   const participantsQuery = useQuery({
@@ -68,34 +66,27 @@ export default function ManualParticipants() {
       const participantData = participantsQuery.data.map((p: any) => ({
         name: p.name,
         phone: p.phone,
-        // Convert to integer VND (round to nearest dong)
         amountToPay: Math.round(parseFloat(p.amountToPay)).toString()
       }));
       form.reset({ participants: participantData });
-      
-      // Store original amounts to track manual edits
-      const amounts = participantData.map(p => p.amountToPay);
-      setOriginalAmounts(amounts);
-      setManuallyEditedParticipants(new Set()); // Reset manual edit tracking
+      setManuallyEditedParticipants(new Set());
     }
   }, [participantsQuery.data, form]);
 
   // Calculate totals and validation
   const currentParticipants = form.watch('participants') || [];
   const billTotal = parseFloat(billQuery.data?.totalAmount || '0');
-  const billTotalVND = Math.round(billTotal); // Convert to integer VND
+  const billTotalVND = Math.round(billTotal);
   
-  // Calculate total assigned with integer arithmetic (amounts are in VND)
   const totalAssignedVND = currentParticipants.reduce((sum, p) => {
     const amountVND = parseInt(p.amountToPay) || 0;
     return sum + amountVND;
   }, 0);
   
-  const totalAssigned = totalAssignedVND;
-  const remaining = billTotalVND - totalAssigned;
-  const isBalanced = remaining === 0; // Perfect balance for integer currency
+  const remaining = billTotalVND - totalAssignedVND;
+  const isBalanced = remaining === 0;
 
-  // Auto-split logic - distributes bill total equally among all participants
+  // Auto-split logic
   const autoSplitAmounts = () => {
     const participantCount = currentParticipants.length;
     
@@ -108,24 +99,16 @@ export default function ManualParticipants() {
       return;
     }
     
-    // Calculate base amount per person in VND
     const baseAmountVND = Math.floor(billTotalVND / participantCount);
+    const remainderVND = billTotalVND - (baseAmountVND * participantCount);
     
-    // Calculate remainder after distributing base amounts
-    const totalBaseAmountVND = baseAmountVND * participantCount;
-    const remainderVND = billTotalVND - totalBaseAmountVND;
-    
-    // Distribute amounts: first participant gets the remainder added
     const updatedParticipants = currentParticipants.map((participant, index) => ({
       ...participant,
       amountToPay: (index === 0 ? baseAmountVND + remainderVND : baseAmountVND).toString()
     }));
     
     form.setValue('participants', updatedParticipants);
-    
-    // Reset manual edit tracking since we're doing a fresh equal split
     setManuallyEditedParticipants(new Set());
-    setOriginalAmounts(updatedParticipants.map(p => p.amountToPay));
     
     toast({
       title: "Amounts Split Equally",
@@ -133,7 +116,7 @@ export default function ManualParticipants() {
     });
   };
 
-  // Redistribute remaining amount only among participants that haven't been manually edited
+  // Redistribute remaining amount
   const redistributeRemaining = () => {
     const participantCount = currentParticipants.length;
     
@@ -154,7 +137,6 @@ export default function ManualParticipants() {
       return;
     }
 
-    // Find participants that haven't been manually edited
     const unEditedIndices = [];
     for (let i = 0; i < participantCount; i++) {
       if (!manuallyEditedParticipants.has(i)) {
@@ -171,28 +153,21 @@ export default function ManualParticipants() {
       return;
     }
     
-    // Calculate remaining amount in VND
-    const remainingVND = remaining;
-    
-    // Distribute the remaining amount only among unedited participants
-    const adjustmentPerPersonVND = Math.floor(remainingVND / unEditedIndices.length);
-    const redistributionRemainderVND = remainingVND - (adjustmentPerPersonVND * unEditedIndices.length);
+    const adjustmentPerPersonVND = Math.floor(remaining / unEditedIndices.length);
+    const redistributionRemainderVND = remaining - (adjustmentPerPersonVND * unEditedIndices.length);
     
     const updatedParticipants = currentParticipants.map((participant, index) => {
-      // Only adjust amounts for participants that haven't been manually edited
       if (unEditedIndices.includes(index)) {
         const currentAmountVND = parseInt(participant.amountToPay) || 0;
-        // Give the remainder to the first unedited participant
         const adjustmentVND = index === unEditedIndices[0] ? adjustmentPerPersonVND + redistributionRemainderVND : adjustmentPerPersonVND;
         const newAmountVND = currentAmountVND + adjustmentVND;
         
         return {
           ...participant,
-          amountToPay: Math.max(0, newAmountVND).toString() // Ensure no negative amounts
+          amountToPay: Math.max(0, newAmountVND).toString()
         };
       }
       
-      // Keep manually edited amounts unchanged
       return participant;
     });
     
@@ -200,24 +175,20 @@ export default function ManualParticipants() {
     
     toast({
       title: "Amounts Redistributed",
-      description: `${formatCurrency(Math.abs(remaining))} redistributed among ${unEditedIndices.length} unedited participants. ${manuallyEditedParticipants.size} manually edited amounts preserved.`,
+      description: `${formatCurrency(Math.abs(remaining))} redistributed among ${unEditedIndices.length} unedited participants.`,
     });
   };
 
-  // Track manual edits to participant amounts
+  // Track manual edits
   const handleAmountChange = (index: number, newValue: string) => {
-    // Mark this participant as manually edited
     setManuallyEditedParticipants(prev => new Set(prev).add(index));
     
-    // Validate the amount
-    if (validateAmount(newValue, index)) {
-      // Update the form value
+    if (validateAmount(newValue)) {
       form.setValue(`participants.${index}.amountToPay`, newValue);
     }
   };
 
-  // Validate individual amount doesn't exceed total
-  const validateAmount = (newAmount: string, participantIndex: number) => {
+  const validateAmount = (newAmount: string) => {
     const amountVND = parseInt(newAmount) || 0;
     
     if (amountVND > billTotalVND) {
@@ -243,28 +214,23 @@ export default function ManualParticipants() {
 
   const createParticipantsMutation = useMutation({
     mutationFn: async (data: ParticipantForm) => {
-      // Update existing participants
       for (let i = 0; i < data.participants.length; i++) {
         const participant = data.participants[i];
         const participantData = {
           billId,
           name: participant.name,
           phone: participant.phone,
-          // Store as integer VND
           amountToPay: parseInt(participant.amountToPay).toString(),
-          paymentStatus: i === 0 ? 'paid' : 'pending' // First participant is owner (paid)
+          paymentStatus: i === 0 ? 'paid' : 'pending'
         };
 
         if (participantsQuery.data && participantsQuery.data[i]) {
-          // Update existing participant
           await apiRequest('PUT', `/api/chillbill/bills/${billId}/participants/${participantsQuery.data[i].id}`, participantData);
         } else {
-          // Create new participant
           await apiRequest('POST', `/api/chillbill/bills/${billId}/participants`, participantData);
         }
       }
 
-      // Remove extra participants if any
       if (participantsQuery.data && participantsQuery.data.length > data.participants.length) {
         for (let i = data.participants.length; i < participantsQuery.data.length; i++) {
           await apiRequest('DELETE', `/api/chillbill/bills/${billId}/participants/${participantsQuery.data[i].id}`);
@@ -299,7 +265,6 @@ export default function ManualParticipants() {
       return;
     }
     
-    console.log('Form submitted with participants:', data);
     createParticipantsMutation.mutate(data);
   };
 
@@ -335,353 +300,252 @@ export default function ManualParticipants() {
     );
   }
 
-  // Count manually edited vs unedited participants for better UX
   const unEditedCount = currentParticipants.length - manuallyEditedParticipants.size;
   const canRedistribute = unEditedCount > 0 && !isBalanced;
 
   return (
     <div className="mobile-container">
-      {/* Header */}
+      {/* Compact Header */}
       <header className="mobile-header">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+        <div className="px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setLocation('/')}
-              className="rounded-full w-10 h-10 hover:bg-primary/10 transition-colors"
+              className="rounded-full w-8 h-8 hover:bg-primary/10"
             >
-              <ArrowLeft className="h-5 w-5 text-primary" />
+              <ArrowLeft className="h-4 w-4 text-primary" />
             </Button>
             <img 
               src="https://cake.vn/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FCake-logo-01.e915daf7.webp&w=256&q=75"
               alt="Cake Logo"
-              className="w-10 h-10 rounded-xl object-contain"
+              className="w-8 h-8 rounded-lg object-contain"
             />
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">Review Participants</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Adjust amounts and details</p>
+              <h1 className="text-lg font-bold text-gray-900 dark:text-white">Review Participants</h1>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="mobile-content">
-        {/* Bill Summary Card */}
-        <Card className="mobile-card">
-          <CardContent className="p-6">
-            <div className="text-center space-y-3">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary/15 to-primary/10 rounded-2xl flex items-center justify-center mx-auto">
-                <DollarSign className="w-8 h-8 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{billQuery.data.merchantName}</h3>
-                <p className="text-3xl font-bold text-primary mt-2">{formatCurrency(billTotalVND)}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  {new Date(billQuery.data.billDate).toLocaleDateString()}
-                </p>
+      <div className="px-4 py-3 space-y-4">
+        {/* Compact Bill Summary */}
+        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-bold text-gray-900 dark:text-white">{billQuery.data.merchantName}</h3>
+              <p className="text-xs text-gray-500">{new Date(billQuery.data.billDate).toLocaleDateString()}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xl font-bold text-primary">{formatCurrency(billTotalVND)}</p>
+              <div className={`text-xs font-medium ${
+                isBalanced ? 'text-green-600' : 
+                remaining > 0 ? 'text-orange-600' : 'text-red-600'
+              }`}>
+                {isBalanced ? '✓ Balanced' : `${remaining > 0 ? '+' : ''}${formatCurrency(remaining)}`}
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Balance Status Card */}
-        <Card className={`border-2 ${
-          isBalanced ? 'border-green-200 bg-green-50' : 
-          remaining > 0 ? 'border-orange-200 bg-orange-50' : 
-          'border-red-200 bg-red-50'
-        }`}>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                {isBalanced ? (
-                  <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-6 h-6 text-white" />
-                  </div>
-                ) : (
-                  <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-                    <AlertTriangle className="w-6 h-6 text-white" />
-                  </div>
-                )}
-                <div>
-                  <h4 className="font-semibold text-gray-900">
-                    {isBalanced ? 'Perfectly Balanced' : remaining > 0 ? 'Under-allocated' : 'Over-allocated'}
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    {isBalanced ? 'Ready to save' : `${formatCurrency(Math.abs(remaining))} ${remaining > 0 ? 'missing' : 'excess'}`}
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Total</p>
-                <p className="text-lg font-bold text-gray-900">{formatCurrency(billTotalVND)}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Assigned</p>
-                <p className={`text-lg font-bold ${totalAssigned > billTotalVND ? 'text-red-600' : 'text-gray-900'}`}>
-                  {formatCurrency(totalAssigned)}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wide">Remaining</p>
-                <p className={`text-lg font-bold ${
-                  isBalanced ? 'text-green-600' : 
-                  remaining > 0 ? 'text-orange-600' : 
-                  'text-red-600'
-                }`}>
-                  {formatCurrency(remaining)}
-                </p>
-              </div>
-            </div>
+        {/* Compact Quick Actions */}
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={autoSplitAmounts}
+            disabled={fields.length === 0}
+            className="flex-1 py-2 text-xs border-blue-200 hover:bg-blue-50"
+          >
+            <Shuffle className="w-3 h-3 mr-1" />
+            Equal Split
+          </Button>
+          
+          <Button
+            type="button"
+            variant="outline"
+            onClick={redistributeRemaining}
+            disabled={!canRedistribute}
+            className="flex-1 py-2 text-xs border-orange-200 hover:bg-orange-50"
+          >
+            <Calculator className="w-3 h-3 mr-1" />
+            Redistribute
+          </Button>
 
-            {/* Edit Status */}
-            {manuallyEditedParticipants.size > 0 && (
-              <div className="mt-4 pt-3 border-t border-gray-200">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Manual edits:</span>
-                  <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-700">
-                    {manuallyEditedParticipants.size} of {currentParticipants.length}
-                  </Badge>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => append({ name: '', phone: '', amountToPay: '0' })}
+            className="px-3 py-2 border-green-200 hover:bg-green-50"
+          >
+            <UserPlus className="w-3 h-3" />
+          </Button>
+        </div>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Calculator className="w-5 h-5 text-primary" />
-              Quick Actions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={autoSplitAmounts}
-                disabled={fields.length === 0}
-                className="flex flex-col items-center py-4 h-auto border-blue-200 hover:border-blue-300 hover:bg-blue-50"
-              >
-                <Shuffle className="w-5 h-5 text-blue-600 mb-1" />
-                <span className="text-sm font-medium text-blue-700">Equal Split</span>
-                <span className="text-xs text-blue-600">Reset all amounts</span>
-              </Button>
+        {/* Ultra-Compact Participants Form */}
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+          <div className="space-y-2">
+            {fields.map((field, index) => {
+              const isOwner = index === 0;
+              const isManuallyEdited = manuallyEditedParticipants.has(index);
               
-              <Button
-                type="button"
-                variant="outline"
-                onClick={redistributeRemaining}
-                disabled={!canRedistribute}
-                className="flex flex-col items-center py-4 h-auto border-orange-200 hover:border-orange-300 hover:bg-orange-50"
-              >
-                <Calculator className="w-5 h-5 text-orange-600 mb-1" />
-                <span className="text-sm font-medium text-orange-700">Redistribute</span>
-                <span className="text-xs text-orange-600">
-                  {unEditedCount === 0 ? 'All edited' : `${unEditedCount} unedited`}
-                </span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Participants Form */}
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Users className="w-5 h-5 text-primary" />
-                  Participants ({fields.length})
-                </CardTitle>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => append({ name: '', phone: '', amountToPay: '0' })}
-                  className="flex items-center gap-1"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  Add
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-4">
-                {fields.map((field, index) => {
-                  const isOwner = index === 0;
-                  const isManuallyEdited = manuallyEditedParticipants.has(index);
+              return (
+                <div key={field.id} className={`relative rounded-lg border p-3 transition-all ${
+                  isManuallyEdited ? 'border-blue-300 bg-blue-50/30' : 'border-gray-200 bg-white'
+                } ${isOwner ? 'ring-1 ring-yellow-300' : ''}`}>
                   
-                  return (
-                    <div key={field.id} className={`relative rounded-xl border-2 p-4 transition-all ${
-                      isManuallyEdited ? 'border-blue-300 bg-blue-50/50' : 'border-gray-200 bg-white'
-                    } ${isOwner ? 'ring-2 ring-yellow-200' : ''}`}>
-                      {/* Remove Button */}
-                      {fields.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            remove(index);
-                            // Update manual edit tracking when removing participants
-                            const newEditedSet = new Set(manuallyEditedParticipants);
-                            newEditedSet.delete(index);
-                            // Shift indices down for participants after the removed one
-                            const shiftedSet = new Set<number>();
-                            newEditedSet.forEach(editedIndex => {
-                              if (editedIndex < index) {
-                                shiftedSet.add(editedIndex);
-                              } else if (editedIndex > index) {
-                                shiftedSet.add(editedIndex - 1);
-                              }
-                            });
-                            setManuallyEditedParticipants(shiftedSet);
-                          }}
-                          className="absolute top-2 right-2 text-red-500 hover:text-red-700 hover:bg-red-50 w-8 h-8 p-0"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                      
-                      {/* Status Badges */}
-                      <div className="flex items-center gap-2 mb-3">
-                        {isOwner && (
-                          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">
-                            <Crown className="w-3 h-3 mr-1" />
-                            Bill Owner
-                          </Badge>
-                        )}
-                        {isManuallyEdited && (
-                          <Badge variant="outline" className="bg-blue-100 border-blue-300 text-blue-700">
-                            Manually Edited
-                          </Badge>
-                        )}
-                      </div>
-
-                      {/* Form Fields */}
-                      <div className="space-y-3">
-                        {/* Name Field */}
-                        <div>
-                          <Label className="text-sm font-medium text-gray-700 flex items-center gap-1">
-                            <Users className="w-4 h-4" />
-                            Full Name
-                          </Label>
-                          <Input
-                            {...form.register(`participants.${index}.name`)}
-                            placeholder="Enter participant's name"
-                            className="mt-1 h-11 text-base"
-                          />
-                        </div>
-
-                        {/* Phone Field */}
-                        <div>
-                          <Label className="text-sm font-medium text-gray-700 flex items-center gap-1">
-                            <Phone className="w-4 h-4" />
-                            Phone Number
-                          </Label>
-                          <Input
-                            {...form.register(`participants.${index}.phone`)}
-                            placeholder="+84 xxx xxx xxx"
-                            className="mt-1 h-11 text-base"
-                          />
-                        </div>
-
-                        {/* Amount Field */}
-                        <div>
-                          <Label className="text-sm font-medium text-gray-700 flex items-center gap-1">
-                            <DollarSign className="w-4 h-4" />
-                            Amount (VND)
-                          </Label>
-                          <FormattedNumberInput
-                            value={form.watch(`participants.${index}.amountToPay`) || ''}
-                            onChange={(value) => handleAmountChange(index, value)}
-                            placeholder="0"
-                            className={`mt-1 h-11 text-base font-semibold ${
-                              isOwner ? 'text-primary' : 'text-gray-900'
-                            } ${isManuallyEdited ? 'border-blue-300 bg-blue-50' : ''}`}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {/* Empty State */}
-                {fields.length === 0 && (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Users className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <h4 className="text-lg font-semibold text-gray-900 mb-2">No Participants Yet</h4>
-                    <p className="text-gray-600 mb-4">Add people to split this bill</p>
+                  {/* Remove Button */}
+                  {fields.length > 1 && (
                     <Button
                       type="button"
-                      onClick={() => append({ name: '', phone: '', amountToPay: '0' })}
-                      className="bg-primary text-white"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        remove(index);
+                        const newEditedSet = new Set(manuallyEditedParticipants);
+                        newEditedSet.delete(index);
+                        const shiftedSet = new Set<number>();
+                        newEditedSet.forEach(editedIndex => {
+                          if (editedIndex < index) {
+                            shiftedSet.add(editedIndex);
+                          } else if (editedIndex > index) {
+                            shiftedSet.add(editedIndex - 1);
+                          }
+                        });
+                        setManuallyEditedParticipants(shiftedSet);
+                      }}
+                      className="absolute top-1 right-1 text-red-500 hover:text-red-700 w-6 h-6 p-0"
                     >
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Add First Participant
+                      <Trash2 className="w-3 h-3" />
                     </Button>
+                  )}
+                  
+                  {/* Compact Status Badges */}
+                  <div className="flex items-center gap-1 mb-2">
+                    {isOwner && (
+                      <Badge className="bg-yellow-100 text-yellow-800 text-xs px-1 py-0">
+                        <Crown className="w-2 h-2 mr-1" />
+                        Owner
+                      </Badge>
+                    )}
+                    {isManuallyEdited && (
+                      <Badge variant="outline" className="bg-blue-100 border-blue-300 text-blue-700 text-xs px-1 py-0">
+                        Edited
+                      </Badge>
+                    )}
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Action Buttons */}
-          <div className="space-y-4">
+                  {/* Compact Form Grid */}
+                  <div className="grid grid-cols-12 gap-2 items-end">
+                    {/* Name - 5 columns */}
+                    <div className="col-span-5">
+                      <Label className="text-xs text-gray-600 flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        Name
+                      </Label>
+                      <Input
+                        {...form.register(`participants.${index}.name`)}
+                        placeholder="Full name"
+                        className="h-8 text-sm"
+                      />
+                    </div>
+
+                    {/* Phone - 4 columns */}
+                    <div className="col-span-4">
+                      <Label className="text-xs text-gray-600 flex items-center gap-1">
+                        <Phone className="w-3 h-3" />
+                        Phone
+                      </Label>
+                      <Input
+                        {...form.register(`participants.${index}.phone`)}
+                        placeholder="+84 xxx xxx"
+                        className="h-8 text-sm"
+                      />
+                    </div>
+
+                    {/* Amount - 3 columns */}
+                    <div className="col-span-3">
+                      <Label className="text-xs text-gray-600 flex items-center gap-1">
+                        <DollarSign className="w-3 h-3" />
+                        VND
+                      </Label>
+                      <FormattedNumberInput
+                        value={form.watch(`participants.${index}.amountToPay`) || ''}
+                        onChange={(value) => handleAmountChange(index, value)}
+                        placeholder="0"
+                        className={`h-8 text-sm font-semibold ${
+                          isOwner ? 'text-primary' : 'text-gray-900'
+                        } ${isManuallyEdited ? 'border-blue-300' : ''}`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Compact Empty State */}
+            {fields.length === 0 && (
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
+                <Users className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <h4 className="font-medium text-gray-900 mb-1">No Participants</h4>
+                <p className="text-sm text-gray-600 mb-3">Add people to split this bill</p>
+                <Button
+                  type="button"
+                  onClick={() => append({ name: '', phone: '', amountToPay: '0' })}
+                  className="bg-primary text-white"
+                  size="sm"
+                >
+                  <UserPlus className="w-4 h-4 mr-1" />
+                  Add First Participant
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Compact Action Button */}
+          <div className="pt-2">
             <Button
               type="submit"
-              className="w-full bg-primary text-white py-4 text-lg font-semibold hover:bg-primary/90"
+              className="w-full bg-primary text-white py-3 font-semibold hover:bg-primary/90"
               disabled={createParticipantsMutation.isPending || !isBalanced || fields.length === 0}
             >
               {createParticipantsMutation.isPending ? (
                 <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  Saving Changes...
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Saving...
                 </div>
               ) : (
                 'Continue to Bill Details'
               )}
             </Button>
             
-            {/* Balance Warning */}
+            {/* Compact Balance Warning */}
             {!isBalanced && fields.length > 0 && (
-              <Card className={`border-2 ${
+              <div className={`mt-2 p-2 rounded-lg border ${
                 remaining > 0 ? 'border-orange-200 bg-orange-50' : 'border-red-200 bg-red-50'
               }`}>
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className={`w-5 h-5 mt-0.5 ${
-                      remaining > 0 ? 'text-orange-600' : 'text-red-600'
-                    }`} />
-                    <div>
-                      <h4 className={`font-semibold ${
-                        remaining > 0 ? 'text-orange-800' : 'text-red-800'
-                      }`}>
-                        {remaining > 0 ? 'Under-allocated' : 'Over-allocated'} by {formatCurrency(Math.abs(remaining))}
-                      </h4>
-                      <p className={`text-sm mt-1 ${
-                        remaining > 0 ? 'text-orange-700' : 'text-red-700'
-                      }`}>
-                        {canRedistribute ? (
-                          `Use "Redistribute" to balance among ${unEditedCount} unedited participants, or "Equal Split" to reset all amounts.`
-                        ) : manuallyEditedParticipants.size === currentParticipants.length ? (
-                          'All amounts have been manually edited. Use "Equal Split" to reset and redistribute evenly.'
-                        ) : (
-                          'Use "Equal Split" to distribute evenly among all participants.'
-                        )}
-                      </p>
-                    </div>
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className={`w-4 h-4 ${
+                    remaining > 0 ? 'text-orange-600' : 'text-red-600'
+                  }`} />
+                  <div>
+                    <p className={`text-sm font-medium ${
+                      remaining > 0 ? 'text-orange-800' : 'text-red-800'
+                    }`}>
+                      {remaining > 0 ? 'Under-allocated' : 'Over-allocated'} by {formatCurrency(Math.abs(remaining))}
+                    </p>
+                    <p className={`text-xs ${
+                      remaining > 0 ? 'text-orange-700' : 'text-red-700'
+                    }`}>
+                      {canRedistribute ? 
+                        `Use "Redistribute" to balance among ${unEditedCount} unedited participants.` :
+                        'Use "Equal Split" to reset and redistribute evenly.'
+                      }
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
           </div>
         </form>
