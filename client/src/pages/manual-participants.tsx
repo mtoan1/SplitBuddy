@@ -66,8 +66,8 @@ export default function ManualParticipants() {
       const participantData = participantsQuery.data.map((p: any) => ({
         name: p.name,
         phone: p.phone,
-        // Convert decimal amounts to integers (multiply by 100 to preserve cents as whole numbers)
-        amountToPay: Math.round(parseFloat(p.amountToPay) * 100).toString()
+        // Convert to integer VND (round to nearest dong)
+        amountToPay: Math.round(parseFloat(p.amountToPay)).toString()
       }));
       form.reset({ participants: participantData });
       
@@ -81,17 +81,17 @@ export default function ManualParticipants() {
   // Calculate totals and validation
   const currentParticipants = form.watch('participants') || [];
   const billTotal = parseFloat(billQuery.data?.totalAmount || '0');
-  const billTotalCents = Math.round(billTotal * 100); // Convert to cents for integer calculations
+  const billTotalVND = Math.round(billTotal); // Convert to integer VND
   
-  // Calculate total assigned with integer arithmetic (amounts are in cents)
-  const totalAssignedCents = currentParticipants.reduce((sum, p) => {
-    const amountCents = parseInt(p.amountToPay) || 0;
-    return sum + amountCents;
+  // Calculate total assigned with integer arithmetic (amounts are in VND)
+  const totalAssignedVND = currentParticipants.reduce((sum, p) => {
+    const amountVND = parseInt(p.amountToPay) || 0;
+    return sum + amountVND;
   }, 0);
   
-  const totalAssigned = totalAssignedCents / 100; // Convert back to dollars for display
-  const remaining = billTotal - totalAssigned;
-  const isBalanced = Math.abs(remaining) < 0.01; // Allow for small rounding differences
+  const totalAssigned = totalAssignedVND;
+  const remaining = billTotalVND - totalAssigned;
+  const isBalanced = remaining === 0; // Perfect balance for integer currency
 
   // Auto-split logic - distributes bill total equally among all participants
   const autoSplitAmounts = () => {
@@ -106,17 +106,17 @@ export default function ManualParticipants() {
       return;
     }
     
-    // Calculate base amount per person in cents
-    const baseAmountCents = Math.floor(billTotalCents / participantCount);
+    // Calculate base amount per person in VND
+    const baseAmountVND = Math.floor(billTotalVND / participantCount);
     
     // Calculate remainder after distributing base amounts
-    const totalBaseAmountCents = baseAmountCents * participantCount;
-    const remainderCents = billTotalCents - totalBaseAmountCents;
+    const totalBaseAmountVND = baseAmountVND * participantCount;
+    const remainderVND = billTotalVND - totalBaseAmountVND;
     
     // Distribute amounts: first participant gets the remainder added
     const updatedParticipants = currentParticipants.map((participant, index) => ({
       ...participant,
-      amountToPay: (index === 0 ? baseAmountCents + remainderCents : baseAmountCents).toString()
+      amountToPay: (index === 0 ? baseAmountVND + remainderVND : baseAmountVND).toString()
     }));
     
     form.setValue('participants', updatedParticipants);
@@ -144,7 +144,7 @@ export default function ManualParticipants() {
       return;
     }
 
-    if (Math.abs(remaining) < 0.01) {
+    if (remaining === 0) {
       toast({
         title: "Already Balanced",
         description: "The bill is already properly split.",
@@ -169,24 +169,24 @@ export default function ManualParticipants() {
       return;
     }
     
-    // Calculate remaining amount in cents
-    const remainingCents = Math.round(remaining * 100);
+    // Calculate remaining amount in VND
+    const remainingVND = remaining;
     
     // Distribute the remaining amount only among unedited participants
-    const adjustmentPerPersonCents = Math.floor(remainingCents / unEditedIndices.length);
-    const redistributionRemainderCents = remainingCents - (adjustmentPerPersonCents * unEditedIndices.length);
+    const adjustmentPerPersonVND = Math.floor(remainingVND / unEditedIndices.length);
+    const redistributionRemainderVND = remainingVND - (adjustmentPerPersonVND * unEditedIndices.length);
     
     const updatedParticipants = currentParticipants.map((participant, index) => {
       // Only adjust amounts for participants that haven't been manually edited
       if (unEditedIndices.includes(index)) {
-        const currentAmountCents = parseInt(participant.amountToPay) || 0;
+        const currentAmountVND = parseInt(participant.amountToPay) || 0;
         // Give the remainder to the first unedited participant
-        const adjustmentCents = index === unEditedIndices[0] ? adjustmentPerPersonCents + redistributionRemainderCents : adjustmentPerPersonCents;
-        const newAmountCents = currentAmountCents + adjustmentCents;
+        const adjustmentVND = index === unEditedIndices[0] ? adjustmentPerPersonVND + redistributionRemainderVND : adjustmentPerPersonVND;
+        const newAmountVND = currentAmountVND + adjustmentVND;
         
         return {
           ...participant,
-          amountToPay: Math.max(0, newAmountCents).toString() // Ensure no negative amounts
+          amountToPay: Math.max(0, newAmountVND).toString() // Ensure no negative amounts
         };
       }
       
@@ -216,19 +216,18 @@ export default function ManualParticipants() {
 
   // Validate individual amount doesn't exceed total
   const validateAmount = (newAmount: string, participantIndex: number) => {
-    const amountCents = parseInt(newAmount) || 0;
-    const amount = amountCents / 100;
+    const amountVND = parseInt(newAmount) || 0;
     
-    if (amount > billTotal) {
+    if (amountVND > billTotalVND) {
       toast({
         title: "Amount Too Large",
-        description: `Individual amount cannot exceed the total bill amount of ${formatCurrency(billTotal)}.`,
+        description: `Individual amount cannot exceed the total bill amount of ${formatCurrency(billTotalVND)}.`,
         variant: "destructive",
       });
       return false;
     }
     
-    if (amountCents < 0) {
+    if (amountVND < 0) {
       toast({
         title: "Invalid Amount",
         description: "Amount cannot be negative.",
@@ -249,8 +248,8 @@ export default function ManualParticipants() {
           billId,
           name: participant.name,
           phone: participant.phone,
-          // Convert cents back to dollars for storage
-          amountToPay: (parseInt(participant.amountToPay) / 100).toFixed(2),
+          // Store as integer VND
+          amountToPay: parseInt(participant.amountToPay).toString(),
           paymentStatus: i === 0 ? 'paid' : 'pending' // First participant is owner (paid)
         };
 
@@ -343,7 +342,7 @@ export default function ManualParticipants() {
         <div className="mobile-card p-4 space-y-3">
           <div className="text-center">
             <h3 className="font-bold text-lg neon-text">{billQuery.data.merchantName}</h3>
-            <div className="text-2xl font-bold text-primary">{formatCurrency(billTotal)}</div>
+            <div className="text-2xl font-bold text-primary">{formatCurrency(billTotalVND)}</div>
             <p className="text-xs text-gray-500">{new Date(billQuery.data.billDate).toLocaleDateString()}</p>
           </div>
           
@@ -374,11 +373,11 @@ export default function ManualParticipants() {
             <div className="space-y-1">
               <div className="flex justify-between text-sm">
                 <span>Bill Total:</span>
-                <span className="font-semibold">{formatCurrency(billTotal)}</span>
+                <span className="font-semibold">{formatCurrency(billTotalVND)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Assigned:</span>
-                <span className={`font-semibold ${totalAssigned > billTotal ? 'text-red-600' : 'text-gray-900'}`}>
+                <span className={`font-semibold ${totalAssigned > billTotalVND ? 'text-red-600' : 'text-gray-900'}`}>
                   {formatCurrency(totalAssigned)}
                 </span>
               </div>
@@ -511,26 +510,21 @@ export default function ManualParticipants() {
                       </div>
 
                       <div>
-                        <Label className="text-xs text-gray-600">Amount (cents)</Label>
-                        <div className="relative">
-                          <Input
-                            {...form.register(`participants.${index}.amountToPay`)}
-                            type="number"
-                            step="1"
-                            min="0"
-                            max={billTotalCents}
-                            placeholder="0"
-                            className={`h-8 text-sm ${isOwner ? 'font-bold text-primary' : ''} ${
-                              isManuallyEdited ? 'border-blue-300 bg-blue-50' : ''
-                            }`}
-                            onChange={(e) => {
-                              handleAmountChange(index, e.target.value);
-                            }}
-                          />
-                          <div className="absolute right-2 top-1 text-xs text-gray-500">
-                            {formatCurrency((parseInt(form.watch(`participants.${index}.amountToPay`)) || 0) / 100)}
-                          </div>
-                        </div>
+                        <Label className="text-xs text-gray-600">Amount (VND)</Label>
+                        <Input
+                          {...form.register(`participants.${index}.amountToPay`)}
+                          type="number"
+                          step="1"
+                          min="0"
+                          max={billTotalVND}
+                          placeholder="0"
+                          className={`h-8 text-sm ${isOwner ? 'font-bold text-primary' : ''} ${
+                            isManuallyEdited ? 'border-blue-300 bg-blue-50' : ''
+                          }`}
+                          onChange={(e) => {
+                            handleAmountChange(index, e.target.value);
+                          }}
+                        />
                       </div>
                     </div>
 
@@ -538,7 +532,7 @@ export default function ManualParticipants() {
                       <Label className="text-xs text-gray-600">Phone</Label>
                       <Input
                         {...form.register(`participants.${index}.phone`)}
-                        placeholder="+1 (555) 000-0000"
+                        placeholder="+84 xxx xxx xxx"
                         className="h-8 text-sm"
                       />
                     </div>

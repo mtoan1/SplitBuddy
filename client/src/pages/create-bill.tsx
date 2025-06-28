@@ -125,8 +125,8 @@ export default function CreateBill() {
   };
 
   const handleReceiptUpload = () => {
-    // Generate random amount between 100 and 5000
-    const randomAmount = (Math.random() * 4900 + 100).toFixed(2);
+    // Generate random amount between 100,000 and 5,000,000 VND
+    const randomAmount = Math.floor(Math.random() * 4900000 + 100000);
     
     // Generate random business name
     const businessNames = [
@@ -144,13 +144,13 @@ export default function CreateBill() {
     const randomDate = new Date(today.getTime() - (daysBack * 24 * 60 * 60 * 1000));
     const formattedDate = randomDate.toISOString().split('T')[0];
     
-    form.setValue("totalAmount", randomAmount);
+    form.setValue("totalAmount", randomAmount.toString());
     form.setValue("merchantName", randomBusiness);
     form.setValue("billDate", formattedDate);
     
     toast({
       title: "Receipt Processed",
-      description: `${randomBusiness} - $${randomAmount} auto-filled`,
+      description: `${randomBusiness} - ${randomAmount.toLocaleString('vi-VN')} VND auto-filled`,
     });
   };
 
@@ -178,18 +178,19 @@ export default function CreateBill() {
     ];
     
     const mockPhones = [
-      "+1 (555) 123-4567", "+1 (555) 234-5678", "+1 (555) 345-6789", "+1 (555) 456-7890",
-      "+1 (555) 567-8901", "+1 (555) 678-9012", "+1 (555) 789-0123", "+1 (555) 890-1234",
-      "+1 (555) 901-2345", "+1 (555) 012-3456", "+1 (555) 123-0987", "+1 (555) 234-8765",
-      "+1 (555) 345-7654", "+1 (555) 456-6543", "+1 (555) 567-5432"
+      "+84 901 234 567", "+84 902 345 678", "+84 903 456 789", "+84 904 567 890",
+      "+84 905 678 901", "+84 906 789 012", "+84 907 890 123", "+84 908 901 234",
+      "+84 909 012 345", "+84 910 123 456", "+84 911 234 567", "+84 912 345 678",
+      "+84 913 456 789", "+84 914 567 890", "+84 915 678 901"
     ];
 
-    // Calculate even split with rounding rules
-    const baseAmount = Math.floor((totalAmount / participantCount) * 100) / 100;
-    const remainder = Math.round((totalAmount - (baseAmount * participantCount)) * 100) / 100;
+    // Calculate even split with integer VND (no decimals)
+    const totalAmountVND = Math.round(totalAmount);
+    const baseAmount = Math.floor(totalAmountVND / participantCount);
+    const remainder = totalAmountVND - (baseAmount * participantCount);
     
-    console.log(`Creating ${participantCount} participants for bill ${billId}, total: $${totalAmount}`);
-    console.log(`Base amount: $${baseAmount}, remainder: $${remainder}`);
+    console.log(`Creating ${participantCount} participants for bill ${billId}, total: ${totalAmountVND} VND`);
+    console.log(`Base amount: ${baseAmount} VND, remainder: ${remainder} VND`);
     
     // Create participants
     for (let i = 0; i < participantCount; i++) {
@@ -200,7 +201,7 @@ export default function CreateBill() {
         billId,
         name: mockNames[i % mockNames.length],
         phone: mockPhones[i % mockPhones.length],
-        amountToPay: amountToPay.toFixed(2).toString(),
+        amountToPay: amountToPay.toString(),
         paymentStatus: isOwner ? 'paid' : 'pending'
       };
       
@@ -317,12 +318,13 @@ export default function CreateBill() {
               </div>
 
               <div>
-                <Label htmlFor="totalAmount" className="text-sm font-bold text-gray-700 dark:text-gray-300">Total Amount</Label>
+                <Label htmlFor="totalAmount" className="text-sm font-bold text-gray-700 dark:text-gray-300">Total Amount (VND)</Label>
                 <Input
                   id="totalAmount"
                   type="number"
-                  step="0.01"
-                  placeholder="0.00"
+                  step="1"
+                  min="0"
+                  placeholder="0"
                   {...form.register('totalAmount')}
                   className="mobile-input text-2xl font-bold text-primary"
                 />
@@ -367,10 +369,6 @@ export default function CreateBill() {
               </div>
             </div>
           </div>
-
-
-
-
 
           <Button 
             type="submit" 

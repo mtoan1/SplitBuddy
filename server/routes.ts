@@ -8,13 +8,13 @@ import QRCode from "qrcode";
 // Helper function to generate random menu items
 function generateRandomItems(totalAmount: number) {
   const items = [
-    { name: "Appetizer", priceRange: [8, 15] },
-    { name: "Main Course", priceRange: [15, 28] },
-    { name: "Side Dish", priceRange: [5, 12] },
-    { name: "Dessert", priceRange: [6, 10] },
-    { name: "Drinks", priceRange: [3, 8] },
-    { name: "Salad", priceRange: [9, 16] },
-    { name: "Soup", priceRange: [6, 12] }
+    { name: "Appetizer", priceRange: [50000, 150000] },
+    { name: "Main Course", priceRange: [150000, 300000] },
+    { name: "Side Dish", priceRange: [30000, 80000] },
+    { name: "Dessert", priceRange: [40000, 100000] },
+    { name: "Drinks", priceRange: [20000, 60000] },
+    { name: "Salad", priceRange: [60000, 120000] },
+    { name: "Soup", priceRange: [40000, 80000] }
   ];
   
   const generatedItems = [];
@@ -29,7 +29,7 @@ function generateRandomItems(totalAmount: number) {
     
     generatedItems.push({
       name: item.name,
-      price: parseFloat(actualPrice.toFixed(2))
+      price: Math.round(actualPrice)
     });
     
     remainingAmount -= actualPrice;
@@ -38,7 +38,7 @@ function generateRandomItems(totalAmount: number) {
   // Add final item with remaining amount (tax, tip, etc.)
   generatedItems.push({
     name: "Tax & Service",
-    price: parseFloat(remainingAmount.toFixed(2))
+    price: Math.round(remainingAmount)
   });
   
   return generatedItems;
@@ -388,16 +388,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Image Processing Endpoints
   app.post("/api/chillbill/bills/:billId/bill-image", async (req, res) => {
     try {
-      // Mock AI service for bill processing with random data
+      // Mock AI service for bill processing with random data in VND
       const restaurants = ["Olive Garden", "McDonald's", "Pizza Hut", "Subway", "KFC", "Starbucks", "Burger King", "Taco Bell", "Chipotle", "Panera Bread"];
-      const randomAmount = (Math.random() * 180 + 20).toFixed(2); // Random amount between $20-$200
+      const randomAmount = Math.floor(Math.random() * 4500000 + 500000); // Random amount between 500,000-5,000,000 VND
       const randomRestaurant = restaurants[Math.floor(Math.random() * restaurants.length)];
       
       const mockBillData = {
-        totalAmount: parseFloat(randomAmount),
+        totalAmount: randomAmount,
         merchantName: randomRestaurant,
         billDate: new Date().toISOString(),
-        items: generateRandomItems(parseFloat(randomAmount))
+        items: generateRandomItems(randomAmount)
       };
 
       // Update bill with extracted data
