@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { QrCode, Share2, Copy, Download, ExternalLink, Users, DollarSign, Smartphone, Link, CheckCircle } from "lucide-react";
+import { QrCode, Share2, Copy, Download, ExternalLink, Link, CheckCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
@@ -117,7 +117,7 @@ export default function QRCodeDisplay({ billId }: QRCodeDisplayProps) {
         <div className="flex items-center justify-center gap-2 mb-2">
           <QrCode className="w-5 h-5 text-primary" />
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Share with participants
+            Bill Sharing
           </h3>
         </div>
         <div className="flex items-center justify-center gap-4 text-sm text-gray-600 dark:text-gray-400">
@@ -138,12 +138,9 @@ export default function QRCodeDisplay({ billId }: QRCodeDisplayProps) {
             className="w-40 h-40 object-contain"
           />
         </div>
-        <div className="text-center space-y-1">
+        <div className="text-center">
           <p className="text-sm font-medium text-gray-900 dark:text-white">
             Scan with any camera app
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Works on iPhone, Android, and tablets
           </p>
         </div>
       </div>
@@ -209,22 +206,6 @@ export default function QRCodeDisplay({ billId }: QRCodeDisplayProps) {
           <p className="text-xs text-gray-600 dark:text-gray-400 font-mono break-all leading-relaxed">
             {qrData.shareUrl}
           </p>
-        </div>
-        
-        {/* Features */}
-        <div className="flex items-center justify-center gap-6 text-xs text-gray-500 dark:text-gray-400">
-          <div className="flex items-center gap-1">
-            <Smartphone className="w-3 h-3" />
-            <span>Mobile optimized</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Users className="w-3 h-3" />
-            <span>No app required</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <CheckCircle className="w-3 h-3" />
-            <span>Instant access</span>
-          </div>
         </div>
       </div>
     </div>
