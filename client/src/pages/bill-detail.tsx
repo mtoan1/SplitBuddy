@@ -217,7 +217,6 @@ export default function BillDetail() {
             />
             <div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">Bill Details</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{bill?.merchantName}</p>
             </div>
           </div>
           <Button
