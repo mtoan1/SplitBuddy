@@ -425,15 +425,13 @@ export default function ManualParticipants() {
 
         {/* Participants Form */}
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-          <div className="space-y-2">
+          <div className="space-y-1">
             {fields.map((field, index) => {
               const isOwner = index === 0;
               const isManuallyEdited = manuallyEditedParticipants.has(index);
               
               return (
-                <div key={field.id} className={`relative rounded-xl p-3 transition-all ${
-                  isManuallyEdited ? 'bg-blue-50 ring-1 ring-blue-200' : 'bg-white'
-                } ${isOwner ? 'ring-1 ring-yellow-300 bg-yellow-50' : ''} shadow-sm`}>
+                <div key={field.id} className="relative py-3 px-1">
                   
                   {/* Remove Button */}
                   {fields.length > 1 && (
@@ -455,7 +453,7 @@ export default function ManualParticipants() {
                         });
                         setManuallyEditedParticipants(shiftedSet);
                       }}
-                      className="absolute top-1 right-1 text-red-500 hover:text-red-700 w-6 h-6 p-0 hover:bg-red-100 rounded-full"
+                      className="absolute top-1 right-1 text-red-500 hover:text-red-700 w-6 h-6 p-0 hover:bg-red-100 rounded-full z-10"
                     >
                       <Trash2 className="w-3 h-3" />
                     </Button>
@@ -477,27 +475,23 @@ export default function ManualParticipants() {
                     )}
                   </div>
 
-                  {/* Optimized Layout: Name/Phone on Left, Amount on Right */}
-                  <div className="flex items-center justify-between gap-3">
-                    {/* Left Side: Name and Phone in Vertical Stack */}
-                    <div className="flex-1 grid grid-cols-2 gap-2">
-                      {/* Name Field */}
-                      <div>
-                        <Input
-                          {...form.register(`participants.${index}.name`)}
-                          placeholder="Full name"
-                          className="h-8 text-sm font-bold bg-white rounded-lg border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
-                        />
-                      </div>
-
-                      {/* Phone Field */}
-                      <div>
-                        <Input
-                          {...form.register(`participants.${index}.phone`)}
-                          placeholder="+84 xxx xxx xxx"
-                          className="h-8 text-xs text-gray-500 bg-white rounded-lg border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary"
-                        />
-                      </div>
+                  {/* Clean Layout: Name || Phone || Amount */}
+                  <div className="flex items-center justify-between gap-4">
+                    {/* Left Side: Name and Phone Stacked */}
+                    <div className="flex-1">
+                      {/* Name - Bold on top */}
+                      <Input
+                        {...form.register(`participants.${index}.name`)}
+                        placeholder="Full name"
+                        className="h-8 text-sm font-bold bg-transparent border-0 border-b border-gray-200 rounded-none focus:border-primary focus:ring-0 px-0 mb-1"
+                      />
+                      
+                      {/* Phone - Smaller gray text below */}
+                      <Input
+                        {...form.register(`participants.${index}.phone`)}
+                        placeholder="+84 xxx xxx xxx"
+                        className="h-6 text-xs text-gray-500 bg-transparent border-0 border-b border-gray-100 rounded-none focus:border-primary focus:ring-0 px-0"
+                      />
                     </div>
 
                     {/* Right Side: Amount Field (Wider) */}
@@ -506,12 +500,17 @@ export default function ManualParticipants() {
                         value={form.watch(`participants.${index}.amountToPay`) || ''}
                         onChange={(value) => handleAmountChange(index, value)}
                         placeholder="0"
-                        className={`h-8 text-sm font-bold text-right rounded-lg border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary ${
-                          isOwner ? 'text-primary bg-primary/5' : 'text-gray-900 bg-white'
-                        } ${isManuallyEdited ? 'border-blue-300 bg-blue-50' : ''}`}
+                        className={`h-8 text-sm font-bold text-right bg-transparent border-0 border-b border-gray-200 rounded-none focus:border-primary focus:ring-0 px-0 ${
+                          isOwner ? 'text-primary' : 'text-gray-900'
+                        } ${isManuallyEdited ? 'border-blue-300 text-blue-700' : ''}`}
                       />
                     </div>
                   </div>
+                  
+                  {/* Subtle divider between participants */}
+                  {index < fields.length - 1 && (
+                    <div className="absolute bottom-0 left-0 right-0 h-px bg-gray-100"></div>
+                  )}
                 </div>
               );
             })}
