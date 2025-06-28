@@ -5,7 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Bell, Receipt, Users, QrCode, Home, ArrowLeft } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Plus, Bell, Receipt, Users, QrCode, Home, ArrowLeft, Crown } from "lucide-react";
 import QRCodeDisplay from "@/components/qr-code-display";
 import ParticipantCard from "@/components/participant-card";
 import { formatCurrency, formatDate, calculatePaidPercentage, calculateTotalPaid } from "@/lib/utils";
@@ -80,15 +81,10 @@ export default function BillDetail() {
     sendIndividualReminderMutation.mutate({ participantId, participantName });
   };
 
-  // Sort participants: bill owner first, then alphabetical by name
-  const sortedParticipants = participants?.slice().sort((a, b) => {
-    // If one is the bill owner and the other isn't, bill owner comes first
-    if (a.name === bill?.createdBy && b.name !== bill?.createdBy) return -1;
-    if (b.name === bill?.createdBy && a.name !== bill?.createdBy) return 1;
-    
-    // Otherwise, sort alphabetically by name
-    return a.name.localeCompare(b.name);
-  });
+  // Separate bill owner from other participants
+  const billOwner = participants?.find(p => p.name === bill?.createdBy);
+  const otherParticipants = participants?.filter(p => p.name !== bill?.createdBy)
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const handleShare = async () => {
     const shareUrl = `${window.location.origin}/bill/${billId}`;
@@ -228,13 +224,11 @@ export default function BillDetail() {
           </CardContent>
         </Card>
 
-
-
         {/* Participants List */}
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white">Participants ({sortedParticipants?.length || 0})</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Participants ({participants?.length || 0})</h3>
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -247,7 +241,7 @@ export default function BillDetail() {
             </div>
             
             <div className="space-y-3">
-              {(sortedParticipants?.length || 0) === 0 ? (
+              {(participants?.length || 0) === 0 ? (
                 <div className="text-center py-8">
                   <Users className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                   <h4 className="font-medium text-gray-900 dark:text-white mb-2">No participants yet</h4>
@@ -261,14 +255,50 @@ export default function BillDetail() {
                   </Button>
                 </div>
               ) : (
-                sortedParticipants?.map((participant: any) => (
-                  <ParticipantCard
-                    key={participant.id}
-                    participant={participant}
-                    showRemindButton={true}
-                    onRemindClick={handleRemindClick}
-                  />
-                ))
+                <>
+                  {/* Bill Owner Section */}
+                  {billOwner && (
+                    <>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Crown className="w-4 h-4 text-yellow-500" />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Bill Owner</span>
+                      </div>
+                      <ParticipantCard
+                        key={billOwner.id}
+                        participant={billOwner}
+                        showRemindButton={false} // Owner doesn't need reminders
+                        onRemindClick={handleRemindClick}
+                      />
+                      
+                      {/* Divider */}
+                      {otherParticipants && otherParticipants.length > 0 && (
+                        <div className="my-4">
+                          <Separator className="bg-gray-200 dark:bg-gray-700" />
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Other Participants Section */}
+                  {otherParticipants && otherParticipants.length > 0 && (
+                    <>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Users className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Other Participants ({otherParticipants.length})
+                        </span>
+                      </div>
+                      {otherParticipants.map((participant: any) => (
+                        <ParticipantCard
+                          key={participant.id}
+                          participant={participant}
+                          showRemindButton={true}
+                          onRemindClick={handleRemindClick}
+                        />
+                      ))}
+                    </>
+                  )}
+                </>
               )}
             </div>
           </CardContent>
