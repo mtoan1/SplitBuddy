@@ -234,9 +234,10 @@ export default function BillDetail() {
         {/* Bill Summary Card */}
         <Card className="mobile-card">
           <CardContent className="p-4">
-            <div className="text-center mb-4">
-              <p className="text-3xl font-bold text-primary">{formatCurrency(totalAmount)}</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Total Amount</p>
+            {/* Bill Name and Total Amount on Same Line */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">{bill?.merchantName}</h3>
+              <p className="text-2xl font-bold text-primary">{formatCurrency(totalAmount)}</p>
             </div>
             
             {/* Progress Bar */}
