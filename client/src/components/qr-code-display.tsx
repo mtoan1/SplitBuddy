@@ -111,13 +111,6 @@ export default function QRCodeDisplay({ billId }: QRCodeDisplayProps) {
 
   return (
     <div className="w-full space-y-8">
-      {/* Bill Name at Top */}
-      <div className="text-center">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-          {qrData.billName}
-        </h3>
-      </div>
-
       {/* QR Code Section */}
       <div className="flex flex-col items-center space-y-4">
         <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
