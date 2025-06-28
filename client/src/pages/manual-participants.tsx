@@ -425,7 +425,7 @@ export default function ManualParticipants() {
 
         {/* Participants Form */}
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-          <div className="space-y-0">
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
             {fields.map((field, index) => {
               const isOwner = index === 0;
               const isManuallyEdited = manuallyEditedParticipants.has(index);
@@ -453,14 +453,14 @@ export default function ManualParticipants() {
                         });
                         setManuallyEditedParticipants(shiftedSet);
                       }}
-                      className="absolute top-1 right-1 text-red-500 hover:text-red-700 w-6 h-6 p-0 hover:bg-red-100 rounded-full z-10"
+                      className="absolute top-2 right-2 text-red-500 hover:text-red-700 w-6 h-6 p-0 hover:bg-red-100 rounded-full z-10"
                     >
                       <Trash2 className="w-3 h-3" />
                     </Button>
                   )}
                   
                   {/* Participant Content */}
-                  <div className="py-3 px-1">
+                  <div className="px-4 py-3">
                     {/* Status Indicators */}
                     <div className="flex items-center gap-2 mb-2">
                       {isOwner && (
@@ -512,7 +512,7 @@ export default function ManualParticipants() {
                   
                   {/* Properly aligned divider between participants */}
                   {index < fields.length - 1 && (
-                    <div className="w-full h-px bg-gray-100 mx-0"></div>
+                    <div className="border-b border-gray-100"></div>
                   )}
                 </div>
               );
@@ -520,7 +520,7 @@ export default function ManualParticipants() {
 
             {/* Empty State */}
             {fields.length === 0 && (
-              <div className="text-center py-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl">
+              <div className="text-center py-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl m-4">
                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Users className="w-6 h-6 text-primary" />
                 </div>
