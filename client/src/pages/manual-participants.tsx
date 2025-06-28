@@ -425,13 +425,13 @@ export default function ManualParticipants() {
 
         {/* Participants Form */}
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-          <div className="space-y-1">
+          <div className="space-y-0">
             {fields.map((field, index) => {
               const isOwner = index === 0;
               const isManuallyEdited = manuallyEditedParticipants.has(index);
               
               return (
-                <div key={field.id} className="relative py-3 px-1">
+                <div key={field.id} className="relative">
                   
                   {/* Remove Button */}
                   {fields.length > 1 && (
@@ -459,57 +459,60 @@ export default function ManualParticipants() {
                     </Button>
                   )}
                   
-                  {/* Status Indicators */}
-                  <div className="flex items-center gap-2 mb-2">
-                    {isOwner && (
-                      <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
-                        <Crown className="w-3 h-3" />
-                        Owner
-                      </div>
-                    )}
-                    {isManuallyEdited && (
-                      <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                        <Zap className="w-3 h-3" />
-                        Custom
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Clean Layout: Name || Phone || Amount */}
-                  <div className="flex items-center justify-between gap-4">
-                    {/* Left Side: Name and Phone Stacked */}
-                    <div className="flex-1">
-                      {/* Name - Bold on top */}
-                      <Input
-                        {...form.register(`participants.${index}.name`)}
-                        placeholder="Full name"
-                        className="h-8 text-sm font-bold bg-transparent border-0 border-b border-gray-200 rounded-none focus:border-primary focus:ring-0 px-0 mb-1"
-                      />
-                      
-                      {/* Phone - Smaller gray text below */}
-                      <Input
-                        {...form.register(`participants.${index}.phone`)}
-                        placeholder="+84 xxx xxx xxx"
-                        className="h-6 text-xs text-gray-500 bg-transparent border-0 border-b border-gray-100 rounded-none focus:border-primary focus:ring-0 px-0"
-                      />
+                  {/* Participant Content */}
+                  <div className="py-3 px-1">
+                    {/* Status Indicators */}
+                    <div className="flex items-center gap-2 mb-2">
+                      {isOwner && (
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                          <Crown className="w-3 h-3" />
+                          Owner
+                        </div>
+                      )}
+                      {isManuallyEdited && (
+                        <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                          <Zap className="w-3 h-3" />
+                          Custom
+                        </div>
+                      )}
                     </div>
 
-                    {/* Right Side: Amount Field (Wider) */}
-                    <div className="w-32">
-                      <FormattedNumberInput
-                        value={form.watch(`participants.${index}.amountToPay`) || ''}
-                        onChange={(value) => handleAmountChange(index, value)}
-                        placeholder="0"
-                        className={`h-8 text-sm font-bold text-right bg-transparent border-0 border-b border-gray-200 rounded-none focus:border-primary focus:ring-0 px-0 ${
-                          isOwner ? 'text-primary' : 'text-gray-900'
-                        } ${isManuallyEdited ? 'border-blue-300 text-blue-700' : ''}`}
-                      />
+                    {/* Clean Layout: Name || Phone || Amount */}
+                    <div className="flex items-center justify-between gap-4">
+                      {/* Left Side: Name and Phone Stacked */}
+                      <div className="flex-1">
+                        {/* Name - Bold on top */}
+                        <Input
+                          {...form.register(`participants.${index}.name`)}
+                          placeholder="Full name"
+                          className="h-8 text-sm font-bold bg-transparent border-0 border-b border-gray-200 rounded-none focus:border-primary focus:ring-0 px-0 mb-1"
+                        />
+                        
+                        {/* Phone - Smaller gray text below */}
+                        <Input
+                          {...form.register(`participants.${index}.phone`)}
+                          placeholder="+84 xxx xxx xxx"
+                          className="h-6 text-xs text-gray-500 bg-transparent border-0 border-b border-gray-100 rounded-none focus:border-primary focus:ring-0 px-0"
+                        />
+                      </div>
+
+                      {/* Right Side: Amount Field (Wider) */}
+                      <div className="w-32">
+                        <FormattedNumberInput
+                          value={form.watch(`participants.${index}.amountToPay`) || ''}
+                          onChange={(value) => handleAmountChange(index, value)}
+                          placeholder="0"
+                          className={`h-8 text-sm font-bold text-right bg-transparent border-0 border-b border-gray-200 rounded-none focus:border-primary focus:ring-0 px-0 ${
+                            isOwner ? 'text-primary' : 'text-gray-900'
+                          } ${isManuallyEdited ? 'border-blue-300 text-blue-700' : ''}`}
+                        />
+                      </div>
                     </div>
                   </div>
                   
-                  {/* Subtle divider between participants */}
+                  {/* Properly aligned divider between participants */}
                   {index < fields.length - 1 && (
-                    <div className="absolute bottom-0 left-0 right-0 h-px bg-gray-100"></div>
+                    <div className="w-full h-px bg-gray-100 mx-0"></div>
                   )}
                 </div>
               );
