@@ -66,7 +66,8 @@ export default function ManualParticipants() {
       const participantData = participantsQuery.data.map((p: any) => ({
         name: p.name,
         phone: p.phone,
-        amountToPay: p.amountToPay.toString()
+        // Convert decimal amounts to integers (multiply by 100 to preserve cents as whole numbers)
+        amountToPay: Math.round(parseFloat(p.amountToPay) * 100).toString()
       }));
       form.reset({ participants: participantData });
       
@@ -80,13 +81,15 @@ export default function ManualParticipants() {
   // Calculate totals and validation
   const currentParticipants = form.watch('participants') || [];
   const billTotal = parseFloat(billQuery.data?.totalAmount || '0');
+  const billTotalCents = Math.round(billTotal * 100); // Convert to cents for integer calculations
   
-  // Calculate total assigned with proper number handling
-  const totalAssigned = currentParticipants.reduce((sum, p) => {
-    const amount = parseFloat(p.amountToPay) || 0;
-    return sum + amount;
+  // Calculate total assigned with integer arithmetic (amounts are in cents)
+  const totalAssignedCents = currentParticipants.reduce((sum, p) => {
+    const amountCents = parseInt(p.amountToPay) || 0;
+    return sum + amountCents;
   }, 0);
   
+  const totalAssigned = totalAssignedCents / 100; // Convert back to dollars for display
   const remaining = billTotal - totalAssigned;
   const isBalanced = Math.abs(remaining) < 0.01; // Allow for small rounding differences
 
@@ -103,17 +106,17 @@ export default function ManualParticipants() {
       return;
     }
     
-    // Calculate base amount per person (rounded down to nearest cent)
-    const baseAmount = Math.floor((billTotal / participantCount) * 100) / 100;
+    // Calculate base amount per person in cents
+    const baseAmountCents = Math.floor(billTotalCents / participantCount);
     
     // Calculate remainder after distributing base amounts
-    const totalBaseAmount = baseAmount * participantCount;
-    const remainder = Math.round((billTotal - totalBaseAmount) * 100) / 100;
+    const totalBaseAmountCents = baseAmountCents * participantCount;
+    const remainderCents = billTotalCents - totalBaseAmountCents;
     
     // Distribute amounts: first participant gets the remainder added
     const updatedParticipants = currentParticipants.map((participant, index) => ({
       ...participant,
-      amountToPay: (index === 0 ? baseAmount + remainder : baseAmount).toFixed(2)
+      amountToPay: (index === 0 ? baseAmountCents + remainderCents : baseAmountCents).toString()
     }));
     
     form.setValue('participants', updatedParticipants);
@@ -166,21 +169,24 @@ export default function ManualParticipants() {
       return;
     }
     
+    // Calculate remaining amount in cents
+    const remainingCents = Math.round(remaining * 100);
+    
     // Distribute the remaining amount only among unedited participants
-    const adjustmentPerPerson = Math.floor((remaining / unEditedIndices.length) * 100) / 100;
-    const redistributionRemainder = Math.round((remaining - (adjustmentPerPerson * unEditedIndices.length)) * 100) / 100;
+    const adjustmentPerPersonCents = Math.floor(remainingCents / unEditedIndices.length);
+    const redistributionRemainderCents = remainingCents - (adjustmentPerPersonCents * unEditedIndices.length);
     
     const updatedParticipants = currentParticipants.map((participant, index) => {
       // Only adjust amounts for participants that haven't been manually edited
       if (unEditedIndices.includes(index)) {
-        const currentAmount = parseFloat(participant.amountToPay) || 0;
+        const currentAmountCents = parseInt(participant.amountToPay) || 0;
         // Give the remainder to the first unedited participant
-        const adjustment = index === unEditedIndices[0] ? adjustmentPerPerson + redistributionRemainder : adjustmentPerPerson;
-        const newAmount = currentAmount + adjustment;
+        const adjustmentCents = index === unEditedIndices[0] ? adjustmentPerPersonCents + redistributionRemainderCents : adjustmentPerPersonCents;
+        const newAmountCents = currentAmountCents + adjustmentCents;
         
         return {
           ...participant,
-          amountToPay: Math.max(0, newAmount).toFixed(2) // Ensure no negative amounts
+          amountToPay: Math.max(0, newAmountCents).toString() // Ensure no negative amounts
         };
       }
       
@@ -210,7 +216,8 @@ export default function ManualParticipants() {
 
   // Validate individual amount doesn't exceed total
   const validateAmount = (newAmount: string, participantIndex: number) => {
-    const amount = parseFloat(newAmount) || 0;
+    const amountCents = parseInt(newAmount) || 0;
+    const amount = amountCents / 100;
     
     if (amount > billTotal) {
       toast({
@@ -221,7 +228,7 @@ export default function ManualParticipants() {
       return false;
     }
     
-    if (amount < 0) {
+    if (amountCents < 0) {
       toast({
         title: "Invalid Amount",
         description: "Amount cannot be negative.",
@@ -242,7 +249,8 @@ export default function ManualParticipants() {
           billId,
           name: participant.name,
           phone: participant.phone,
-          amountToPay: participant.amountToPay,
+          // Convert cents back to dollars for storage
+          amountToPay: (parseInt(participant.amountToPay) / 100).toFixed(2),
           paymentStatus: i === 0 ? 'paid' : 'pending' // First participant is owner (paid)
         };
 
@@ -433,7 +441,7 @@ export default function ManualParticipants() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => append({ name: '', phone: '', amountToPay: '0.00' })}
+                  onClick={() => append({ name: '', phone: '', amountToPay: '0' })}
                   className="h-6 px-2"
                 >
                   <Plus className="w-3 h-3 mr-1" />
@@ -503,21 +511,26 @@ export default function ManualParticipants() {
                       </div>
 
                       <div>
-                        <Label className="text-xs text-gray-600">Amount</Label>
-                        <Input
-                          {...form.register(`participants.${index}.amountToPay`)}
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          max={billTotal}
-                          placeholder="0.00"
-                          className={`h-8 text-sm ${isOwner ? 'font-bold text-primary' : ''} ${
-                            isManuallyEdited ? 'border-blue-300 bg-blue-50' : ''
-                          }`}
-                          onChange={(e) => {
-                            handleAmountChange(index, e.target.value);
-                          }}
-                        />
+                        <Label className="text-xs text-gray-600">Amount (cents)</Label>
+                        <div className="relative">
+                          <Input
+                            {...form.register(`participants.${index}.amountToPay`)}
+                            type="number"
+                            step="1"
+                            min="0"
+                            max={billTotalCents}
+                            placeholder="0"
+                            className={`h-8 text-sm ${isOwner ? 'font-bold text-primary' : ''} ${
+                              isManuallyEdited ? 'border-blue-300 bg-blue-50' : ''
+                            }`}
+                            onChange={(e) => {
+                              handleAmountChange(index, e.target.value);
+                            }}
+                          />
+                          <div className="absolute right-2 top-1 text-xs text-gray-500">
+                            {formatCurrency((parseInt(form.watch(`participants.${index}.amountToPay`)) || 0) / 100)}
+                          </div>
+                        </div>
                       </div>
                     </div>
 
