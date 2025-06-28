@@ -317,40 +317,40 @@ export default function ManualParticipants() {
   const canRedistribute = unEditedCount > 0 && !isBalanced;
 
   return (
-    <div className="mobile-container">
+    <div className="mobile-container bg-gray-50">
       {/* Minimal Header */}
-      <header className="mobile-header">
+      <header className="bg-white/95 backdrop-blur-sm sticky top-0 z-10">
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setLocation('/')}
-              className="rounded-full w-8 h-8 hover:bg-primary/10"
+              className="rounded-full w-8 h-8 hover:bg-gray-100"
             >
-              <ArrowLeft className="h-4 w-4 text-primary" />
+              <ArrowLeft className="h-4 w-4 text-gray-700" />
             </Button>
             <img 
               src="https://cake.vn/_next/image?url=%2F_next%2Fstatic%2Fmedia%2FCake-logo-01.e915daf7.webp&w=256&q=75"
               alt="Cake Logo"
               className="w-8 h-8 rounded-lg object-contain"
             />
-            <h1 className="text-lg font-bold text-gray-900 dark:text-white">Split Bill</h1>
+            <h1 className="text-lg font-semibold text-gray-900">Split Bill</h1>
           </div>
         </div>
       </header>
 
-      <div className="px-4 py-3 space-y-4">
-        {/* Compact Bill Summary */}
-        <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-2xl p-4">
-          <div className="flex items-center justify-between">
+      <div className="px-4 py-4 space-y-6">
+        {/* Bill Summary Card */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-bold text-gray-900 dark:text-white">{billQuery.data.merchantName}</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{billQuery.data.merchantName}</h3>
               <p className="text-sm text-gray-500">{new Date(billQuery.data.billDate).toLocaleDateString()}</p>
             </div>
             <div className="text-right">
-              <p className="text-xl font-bold text-primary">{formatCurrency(billTotalVND)}</p>
-              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(billTotalVND)}</p>
+              <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${
                 isBalanced ? 'bg-green-100 text-green-700' : 
                 remaining > 0 ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700'
               }`}>
@@ -370,180 +370,186 @@ export default function ManualParticipants() {
           </div>
         </div>
 
-        {/* Compact Action Bar */}
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={autoSplitAmounts}
-            disabled={fields.length === 0}
-            className="flex-1 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 rounded-xl py-2"
-          >
-            <Target className="w-4 h-4 mr-1" />
-            Equal
-          </Button>
-          
-          <Button
-            type="button"
-            variant="outline"
-            onClick={redistributeRemaining}
-            disabled={!canRedistribute}
-            className="flex-1 bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100 rounded-xl py-2 disabled:opacity-50"
-          >
-            <Calculator className="w-4 h-4 mr-1" />
-            Redistribute
-          </Button>
+        {/* Action Controls */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm">
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={autoSplitAmounts}
+              disabled={fields.length === 0}
+              className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 rounded-xl py-3 font-medium"
+            >
+              <Target className="w-4 h-4 mr-2" />
+              Equal Split
+            </Button>
+            
+            <Button
+              type="button"
+              variant="outline"
+              onClick={redistributeRemaining}
+              disabled={!canRedistribute}
+              className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100 rounded-xl py-3 font-medium disabled:opacity-50"
+            >
+              <Calculator className="w-4 h-4 mr-2" />
+              Redistribute
+            </Button>
+          </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={resetAllAmounts}
-            disabled={fields.length === 0}
-            className="bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100 rounded-xl px-3 py-2"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={resetAllAmounts}
+              disabled={fields.length === 0}
+              className="flex-1 bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100 rounded-xl py-2"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Reset
+            </Button>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => append({ name: '', phone: '', amountToPay: '0' })}
-            className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 rounded-xl px-3 py-2"
-          >
-            <UserPlus className="w-4 h-4" />
-          </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => append({ name: '', phone: '', amountToPay: '0' })}
+              className="flex-1 bg-green-50 border-green-200 text-green-700 hover:bg-green-100 rounded-xl py-2"
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Add Person
+            </Button>
+          </div>
+
+          {/* Smart Insight */}
+          {unEditedCount > 0 && !isBalanced && (
+            <div className="mt-4 bg-blue-50 rounded-xl p-3">
+              <p className="text-xs text-blue-700">
+                💡 <strong>{unEditedCount} participants</strong> can auto-adjust to balance
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Smart Insight */}
-        {unEditedCount > 0 && !isBalanced && (
-          <div className="bg-blue-50 rounded-xl p-3">
-            <p className="text-xs text-blue-700">
-              💡 <strong>{unEditedCount} participants</strong> can auto-adjust to balance
-            </p>
-          </div>
-        )}
-
-        {/* Participants Form */}
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-          <div className="space-y-0">
-            {fields.map((field, index) => {
-              const isOwner = index === 0;
-              const isManuallyEdited = manuallyEditedParticipants.has(index);
-              
-              return (
-                <div key={field.id} className="relative">
-                  
-                  {/* Remove Button */}
-                  {fields.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        remove(index);
-                        const newEditedSet = new Set(manuallyEditedParticipants);
-                        newEditedSet.delete(index);
-                        const shiftedSet = new Set<number>();
-                        newEditedSet.forEach(editedIndex => {
-                          if (editedIndex < index) {
-                            shiftedSet.add(editedIndex);
-                          } else if (editedIndex > index) {
-                            shiftedSet.add(editedIndex - 1);
-                          }
-                        });
-                        setManuallyEditedParticipants(shiftedSet);
-                      }}
-                      className="absolute top-1 right-1 text-red-500 hover:text-red-700 w-6 h-6 p-0 hover:bg-red-100 rounded-full z-10"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  )}
-                  
-                  {/* Participant Content */}
-                  <div className="py-3 px-1">
-                    {/* Status Indicators */}
-                    <div className="flex items-center gap-2 mb-2">
+        {/* Participants List */}
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
+            {fields.length === 0 ? (
+              /* Empty State */
+              <div className="text-center py-12 px-6">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-gray-400" />
+                </div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">No Participants</h4>
+                <p className="text-sm text-gray-500 mb-6">Add people to split this bill</p>
+                <Button
+                  type="button"
+                  onClick={() => append({ name: '', phone: '', amountToPay: '0' })}
+                  className="bg-primary text-white hover:bg-primary/90 rounded-xl px-6 py-3"
+                >
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Add First Participant
+                </Button>
+              </div>
+            ) : (
+              /* Participants List with Alternating Backgrounds */
+              fields.map((field, index) => {
+                const isOwner = index === 0;
+                const isManuallyEdited = manuallyEditedParticipants.has(index);
+                const isEven = index % 2 === 0;
+                
+                return (
+                  <div 
+                    key={field.id} 
+                    className={`relative px-5 py-4 ${
+                      isEven ? 'bg-white' : 'bg-gray-50/50'
+                    } transition-colors duration-200`}
+                  >
+                    
+                    {/* Remove Button */}
+                    {fields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          remove(index);
+                          const newEditedSet = new Set(manuallyEditedParticipants);
+                          newEditedSet.delete(index);
+                          const shiftedSet = new Set<number>();
+                          newEditedSet.forEach(editedIndex => {
+                            if (editedIndex < index) {
+                              shiftedSet.add(editedIndex);
+                            } else if (editedIndex > index) {
+                              shiftedSet.add(editedIndex - 1);
+                            }
+                          });
+                          setManuallyEditedParticipants(shiftedSet);
+                        }}
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700 w-8 h-8 p-0 hover:bg-red-100 rounded-full z-10"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                    
+                    {/* Status Badges */}
+                    <div className="flex items-center gap-2 mb-3">
                       {isOwner && (
-                        <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                        <div className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
                           <Crown className="w-3 h-3" />
                           Owner
                         </div>
                       )}
                       {isManuallyEdited && (
-                        <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                        <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
                           <Zap className="w-3 h-3" />
                           Custom
                         </div>
                       )}
                     </div>
 
-                    {/* Clean Layout: Name || Phone || Amount */}
-                    <div className="flex items-center justify-between gap-4">
+                    {/* Apple-style Layout: Name || Phone || Amount */}
+                    <div className="flex items-center justify-between gap-6">
                       {/* Left Side: Name and Phone Stacked */}
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         {/* Name - Bold on top */}
                         <Input
                           {...form.register(`participants.${index}.name`)}
                           placeholder="Full name"
-                          className="h-8 text-sm font-bold bg-transparent border-0 border-b border-gray-200 rounded-none focus:border-primary focus:ring-0 px-0 mb-1"
+                          className="h-9 text-base font-semibold bg-transparent border-0 border-b border-gray-200 rounded-none focus:border-primary focus:ring-0 px-0 mb-2 placeholder:text-gray-400"
                         />
                         
                         {/* Phone - Smaller gray text below */}
                         <Input
                           {...form.register(`participants.${index}.phone`)}
                           placeholder="+84 xxx xxx xxx"
-                          className="h-6 text-xs text-gray-500 bg-transparent border-0 border-b border-gray-100 rounded-none focus:border-primary focus:ring-0 px-0"
+                          className="h-7 text-sm text-gray-600 bg-transparent border-0 border-b border-gray-100 rounded-none focus:border-primary focus:ring-0 px-0 placeholder:text-gray-400"
                         />
                       </div>
 
                       {/* Right Side: Amount Field (Wider) */}
-                      <div className="w-32">
+                      <div className="w-36 flex-shrink-0">
                         <FormattedNumberInput
                           value={form.watch(`participants.${index}.amountToPay`) || ''}
                           onChange={(value) => handleAmountChange(index, value)}
                           placeholder="0"
-                          className={`h-8 text-sm font-bold text-right bg-transparent border-0 border-b border-gray-200 rounded-none focus:border-primary focus:ring-0 px-0 ${
-                            isOwner ? 'text-primary' : 'text-gray-900'
-                          } ${isManuallyEdited ? 'border-blue-300 text-blue-700' : ''}`}
+                          className={`h-9 text-base font-bold text-right bg-transparent border-0 border-b-2 rounded-none focus:ring-0 px-0 ${
+                            isOwner ? 'text-primary border-primary/30 focus:border-primary' : 
+                            isManuallyEdited ? 'text-blue-700 border-blue-300 focus:border-blue-500' : 
+                            'text-gray-900 border-gray-200 focus:border-primary'
+                          }`}
                         />
                       </div>
                     </div>
                   </div>
-                  
-                  {/* Properly aligned divider between participants */}
-                  {index < fields.length - 1 && (
-                    <div className="w-full h-px bg-gray-100 mx-0"></div>
-                  )}
-                </div>
-              );
-            })}
-
-            {/* Empty State */}
-            {fields.length === 0 && (
-              <div className="text-center py-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Users className="w-6 h-6 text-primary" />
-                </div>
-                <h4 className="font-semibold text-gray-900 mb-2">No Participants</h4>
-                <p className="text-sm text-gray-600 mb-4">Add people to split this bill</p>
-                <Button
-                  type="button"
-                  onClick={() => append({ name: '', phone: '', amountToPay: '0' })}
-                  className="bg-primary text-white hover:bg-primary/90 rounded-xl"
-                  size="sm"
-                >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Add First Participant
-                </Button>
-              </div>
+                );
+              })
             )}
           </div>
 
-          {/* Action Button */}
-          <div className="pt-2">
+          {/* Submit Button */}
+          <div className="space-y-4">
             <Button
               type="submit"
-              className="w-full bg-primary text-white py-3 font-semibold hover:bg-primary/90 rounded-xl shadow-lg"
+              className="w-full bg-primary text-white py-4 text-base font-semibold hover:bg-primary/90 rounded-2xl shadow-lg"
               disabled={createParticipantsMutation.isPending || !isBalanced || fields.length === 0}
             >
               {createParticipantsMutation.isPending ? (
@@ -558,11 +564,11 @@ export default function ManualParticipants() {
             
             {/* Balance Status */}
             {!isBalanced && fields.length > 0 && (
-              <div className={`mt-3 p-3 rounded-xl ${
+              <div className={`p-4 rounded-2xl ${
                 remaining > 0 ? 'bg-orange-50' : 'bg-red-50'
               }`}>
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className={`w-4 h-4 ${
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
                     remaining > 0 ? 'text-orange-600' : 'text-red-600'
                   }`} />
                   <div>
@@ -571,12 +577,12 @@ export default function ManualParticipants() {
                     }`}>
                       {remaining > 0 ? 'Under-allocated' : 'Over-allocated'} by {formatCurrency(Math.abs(remaining))}
                     </p>
-                    <p className={`text-xs ${
+                    <p className={`text-xs mt-1 ${
                       remaining > 0 ? 'text-orange-700' : 'text-red-700'
                     }`}>
                       {canRedistribute ? 
                         `Use "Redistribute" to balance among ${unEditedCount} unedited participants.` :
-                        'Use "Equal" to reset and redistribute evenly.'
+                        'Use "Equal Split" to reset and redistribute evenly.'
                       }
                     </p>
                   </div>
