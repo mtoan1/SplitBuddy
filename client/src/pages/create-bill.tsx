@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { FormattedNumberInput } from "@/components/ui/formatted-number-input";
 import { ArrowLeft, Upload, Users, Receipt } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -320,13 +321,11 @@ export default function CreateBill() {
 
               <div>
                 <Label htmlFor="totalAmount" className="text-sm font-bold text-gray-700 dark:text-gray-300">Total Amount (VND)</Label>
-                <Input
+                <FormattedNumberInput
                   id="totalAmount"
-                  type="number"
-                  step="1"
-                  min="0"
+                  value={form.watch('totalAmount') || ''}
+                  onChange={(value) => form.setValue('totalAmount', value)}
                   placeholder="0"
-                  {...form.register('totalAmount')}
                   className="mobile-input text-2xl font-bold text-primary"
                 />
                 {form.formState.errors.totalAmount && (

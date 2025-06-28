@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { FormattedNumberInput } from "@/components/ui/formatted-number-input";
 import { ArrowLeft, Plus, Trash2, Users, Crown, AlertTriangle, CheckCircle } from "lucide-react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -511,19 +512,13 @@ export default function ManualParticipants() {
 
                       <div>
                         <Label className="text-xs text-gray-600">Amount (VND)</Label>
-                        <Input
-                          {...form.register(`participants.${index}.amountToPay`)}
-                          type="number"
-                          step="1"
-                          min="0"
-                          max={billTotalVND}
+                        <FormattedNumberInput
+                          value={form.watch(`participants.${index}.amountToPay`) || ''}
+                          onChange={(value) => handleAmountChange(index, value)}
                           placeholder="0"
                           className={`h-8 text-sm ${isOwner ? 'font-bold text-primary' : ''} ${
                             isManuallyEdited ? 'border-blue-300 bg-blue-50' : ''
                           }`}
-                          onChange={(e) => {
-                            handleAmountChange(index, e.target.value);
-                          }}
                         />
                       </div>
                     </div>

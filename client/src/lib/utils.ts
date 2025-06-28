@@ -61,3 +61,58 @@ export function calculateTotalPaid(participants: any[]): number {
 export function formatVNDWithCommas(amount: number): string {
   return new Intl.NumberFormat('vi-VN').format(Math.round(amount));
 }
+
+// Format number input value with commas for display
+export function formatNumberWithCommas(value: string): string {
+  // Remove all non-digit characters
+  const numericValue = value.replace(/\D/g, '');
+  
+  // Return empty string if no digits
+  if (!numericValue) return '';
+  
+  // Format with commas
+  return new Intl.NumberFormat('vi-VN').format(parseInt(numericValue));
+}
+
+// Parse comma-formatted string back to plain number string
+export function parseFormattedNumber(formattedValue: string): string {
+  // Remove all non-digit characters (including commas)
+  return formattedValue.replace(/\D/g, '');
+}
+
+// Custom hook for handling comma-formatted number inputs
+export function useFormattedNumberInput(
+  value: string,
+  onChange: (value: string) => void
+) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    
+    // Parse the formatted input back to plain number
+    const numericValue = parseFormattedNumber(inputValue);
+    
+    // Update the underlying value (plain number string)
+    onChange(numericValue);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Ensure the display value is properly formatted on blur
+    const numericValue = parseFormattedNumber(e.target.value);
+    if (numericValue) {
+      e.target.value = formatNumberWithCommas(numericValue);
+    }
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Show plain number when focused for easier editing
+    const numericValue = parseFormattedNumber(e.target.value);
+    e.target.value = numericValue;
+  };
+
+  return {
+    displayValue: value ? formatNumberWithCommas(value) : '',
+    handleChange,
+    handleBlur,
+    handleFocus
+  };
+}
